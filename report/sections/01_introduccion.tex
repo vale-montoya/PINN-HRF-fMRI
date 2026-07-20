@@ -1,0 +1,31 @@
+\section{Introducción}
+
+La resonancia magnética funcional (fMRI) permite estudiar cambios asociados a la actividad cerebral mediante la señal BOLD. Esta señal no mide directamente la descarga neuronal, sino que refleja una respuesta vascular y metabólica con dinámica temporal propia. Por ello, el análisis de fMRI requiere un modelo que relacione el estímulo experimental con la respuesta hemodinámica observada.
+
+El enfoque más utilizado es el modelo lineal general, en el cual los eventos se convolucionan con una HRF canónica y luego se ajustan a la señal observada. Esta representación ha sido fundamental para el análisis de fMRI, pero supone una forma temporal común que no necesariamente captura variaciones locales o individuales \citep{Friston1998,Glover1999}. Además, se han descrito no linealidades y efectos de saturación que pueden limitar la aproximación de convolución lineal en determinados paradigmas \citep{Friston2000}.
+
+Una alternativa consiste en representar explícitamente la dinámica neurovascular mediante el modelo Balloon--Windkessel, que describe la evolución del flujo sanguíneo, volumen venoso y contenido de desoxihemoglobina \citep{Buxton1998,Friston2000}. Sin embargo, estimar sus estados y parámetros a partir de una señal BOLD ruidosa corresponde a un problema inverso potencialmente mal condicionado.
+
+Las redes neuronales informadas por la física incorporan ecuaciones diferenciales en la función de pérdida, combinando observaciones con conocimiento mecanístico \citep{Raissi2019}. En este proyecto se estudia si esta estrategia permite estimar una HRF y parámetros efectivos con mayor robustez que un GLM y una MLP puramente basada en datos.
+
+\subsection{Pregunta de investigación}
+
+¿Puede una PINN que incorpore el modelo Balloon--Windkessel estimar la respuesta hemodinámica y predecir bloques BOLD no utilizados durante el entrenamiento con mayor robustez e interpretabilidad que un GLM canónico y una MLP sin restricciones fisiológicas?
+
+\subsection{Objetivo general}
+
+Desarrollar y evaluar una PINN inversa para estimar la HRF y parámetros efectivos del modelo Balloon--Windkessel a partir de señales fMRI BOLD, comparando su desempeño con un GLM y una MLP en datos sintéticos y reales.
+
+\subsection{Objetivos específicos}
+
+\begin{enumerate}
+    \item Implementar el modelo Balloon--Windkessel y generar señales sintéticas con parámetros conocidos y ruido estructurado.
+    \item Diseñar una PINN que combine error de datos, residuos fisiológicos y condiciones iniciales.
+    \item Comparar GLM, MLP y PINN mediante evaluación fuera de muestra y recuperación de la HRF.
+    \item Aplicar el método a datos motores del Human Connectome Project.
+    \item Analizar la consistencia de la HRF y de los parámetros inferidos, además de sus limitaciones.
+\end{enumerate}
+
+\subsection{Contribuciones del trabajo}
+
+La contribución principal es una metodología de validación en dos niveles. Primero, se comprueba la recuperabilidad de la HRF y de parámetros conocidos en un entorno sintético. Segundo, se evalúa generalización real mediante entrenamiento y prueba en bloques distintos. Esta separación evita confundir un buen ajuste dentro de muestra con identificación fisiológica o capacidad predictiva.

@@ -1,0 +1,9 @@
+\section{Conclusiones}
+
+Se desarrolló una PINN inversa para estimar estados neurovasculares, una HRF operacional y parámetros efectivos del modelo Balloon--Windkessel. La reformulación que separa el entrenamiento de la predicción mediante integración ODE independiente fue fundamental para evitar soluciones físicamente blandas con baja generalización.
+
+En 60 experimentos sintéticos, la PINN recuperó la señal, la HRF y los parámetros con alta precisión incluso bajo ruido elevado, y superó significativamente al GLM y a la MLP. Estos resultados validan la metodología en un entorno con ground truth conocido.
+
+En los datos reales del sujeto HCP 100206, la PINN obtuvo el menor RMSE medio y ganó cuatro de ocho evaluaciones. Las diferencias de error no fueron estadísticamente significativas, pero PINN y MLP presentaron una correlación temporal superior al GLM. La MLP mostró la mayor brecha de generalización, mientras que la PINN produjo HRF altamente consistentes en forma.
+
+En conjunto, la incorporación de conocimiento fisiológico mejoró la identificación y generalización en datos controlados y ofreció una representación interpretable en fMRI real. Sin embargo, la estimación de parámetros individuales, en especial $\tau$, requiere más datos y análisis de incertidumbre antes de atribuir significado fisiológico o clínico directo.

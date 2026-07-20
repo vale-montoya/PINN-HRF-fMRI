@@ -1,0 +1,31 @@
+\section{Discusión}
+
+\subsection{Interpretación de la validación sintética}
+
+La validación sintética demuestra que la formulación inversa puede recuperar tanto la respuesta BOLD retenida como una HRF operacional y parámetros generadores cuando los supuestos del modelo son correctos. La superioridad frente al GLM se explica por la discrepancia entre una HRF canónica fija y la dinámica específica utilizada para generar los datos. La ventaja frente a la MLP es particularmente relevante: la MLP reproduce bien los bloques de entrenamiento, pero su respuesta frente a un evento breve no coincide con la HRF verdadera. La restricción fisiológica reduce el conjunto de soluciones compatibles con los datos.
+
+\subsection{Interpretación de los datos reales}
+
+En el sujeto real, la PINN presentó el mejor error promedio, pero no una superioridad estadística en RMSE. Este resultado es coherente con la mayor complejidad del fMRI real: los bloques pueden diferir por variabilidad neuronal, vascular, de movimiento y de línea base. Además, el modelo Balloon--Windkessel es una simplificación y no representa todos los mecanismos que afectan la señal.
+
+La MLP mostró una correlación temporal alta, pero también una brecha de generalización considerable. Esto sugiere que aprovechó con mayor intensidad particularidades del bloque de entrenamiento. La PINN mantuvo un compromiso entre ajuste, generalización e interpretabilidad.
+
+\subsection{Identificabilidad}
+
+La alta consistencia de forma de la HRF no implica que todos los parámetros sean identificables. Distintas combinaciones de $\epsilon$, $\tau$ y $\alpha$ pueden generar respuestas BOLD similares. $\tau$ fue especialmente variable en datos reales. Por ello, los parámetros se denominan \emph{efectivos}: dependen de las constantes fijadas, la ROI, el preprocesamiento, las cotas y la ventana analizada.
+
+\subsection{Limitaciones}
+
+\begin{itemize}
+    \item La aplicación real se restringió a un sujeto y cuatro combinaciones corrida--ROI.
+    \item Existen solo ocho comparaciones pareadas reales, lo que limita la potencia estadística.
+    \item La validación real no dispone de HRF ni parámetros verdaderos.
+    \item Parte de los parámetros fisiológicos se mantuvo fija.
+    \item No se modeló explícitamente autocorrelación residual en la inferencia del GLM.
+    \item Las ROI esféricas no capturan toda la heterogeneidad espacial de M1.
+    \item La estimación depende de la calidad de la regresión de confusores y de la definición de ventanas.
+\end{itemize}
+
+\subsection{Trabajo futuro}
+
+El siguiente paso natural es ampliar el análisis a múltiples sujetos, incorporar una estrategia jerárquica o poblacional para los parámetros y evaluar sensibilidad a las constantes fisiológicas. También sería pertinente usar estimación de incertidumbre, comparar con deconvolución flexible y explorar PINNs con pesos de pérdida adaptativos.

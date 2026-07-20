@@ -1,32 +1,35 @@
-# Informe LaTeX
+# Informe LaTeX - versión 1
 
-Esta carpeta contendrá:
+Esta carpeta contiene una primera versión completa y compilable del informe.
 
-```text
-report/
-├── main.tex
-├── references.bib
-├── sections/
-├── figures/
-├── tables/
-└── informe_final.pdf
+## Uso dentro del repositorio
+
+Copia todo el contenido de esta carpeta dentro de `report/` del repositorio, reemplazando el README anterior cuando corresponda.
+
+## Compilación en PowerShell
+
+Desde la raíz del repositorio:
+
+```powershell
+cd .\report
+latexmk -pdf main.tex
 ```
 
-El informe deberá incluir:
+Si `latexmk` no está disponible, compila con:
 
-1. título, autora y programa;
-2. resumen;
-3. introducción y problema;
-4. datos y preprocesamiento;
-5. solución propuesta;
-6. arquitectura e implementación;
-7. metodología experimental;
-8. resultados sintéticos;
-9. resultados reales;
-10. discusión crítica;
-11. limitaciones y trabajo futuro;
-12. conclusiones;
-13. bibliografía;
-14. enlace a la presentación grabada.
+```powershell
+pdflatex main.tex
+bibtex main
+pdflatex main.tex
+pdflatex main.tex
+```
 
-No se incluirán listados extensos del código. La implementación completa permanecerá en `src/` y `notebooks/`.
+## Antes de entregar
+
+1. Revisar nombre oficial del programa y unidad académica.
+2. Confirmar el nombre del profesor.
+3. Incorporar el enlace de la presentación grabada.
+4. Revisar que el enlace de GitHub sea correcto.
+5. Sustituir o mejorar las figuras cuando se exporten en formato definitivo.
+6. Ajustar extensión y formato a las instrucciones específicas del curso.
+7. Compilar y revisar visualmente cada página.
