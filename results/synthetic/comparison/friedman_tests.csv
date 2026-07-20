@@ -1,0 +1,7 @@
+target_snr,metric,n_pairs,friedman_statistic,p_value
+10.0,test_rmse_percent,20,32.5,8.76424821944364e-08
+10.0,hrf_rmse_percent,20,40.0,2.0611536224385566e-09
+5.0,test_rmse_percent,20,36.400000000000034,1.2469252785750762e-08
+5.0,hrf_rmse_percent,20,40.0,2.0611536224385566e-09
+2.0,test_rmse_percent,20,40.0,2.0611536224385566e-09
+2.0,hrf_rmse_percent,20,40.0,2.0611536224385566e-09

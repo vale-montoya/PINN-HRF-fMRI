@@ -1,0 +1,4 @@
+model,wins,win_fraction
+PINN,4,0.5
+MLP,2,0.25
+GLM,2,0.25

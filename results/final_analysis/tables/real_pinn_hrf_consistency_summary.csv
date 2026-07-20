@@ -1,0 +1,2 @@
+n_scenarios,hrf_rmse_mean_percent,hrf_rmse_std_percent,hrf_pearson_mean,hrf_pearson_std,peak_absolute_difference_mean_percent
+4,0.04277195725150655,0.03420923562382562,0.9584026934223926,0.04967496261049391,0.11119796967427999

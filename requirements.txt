@@ -1,0 +1,12 @@
+numpy
+pandas
+matplotlib
+scipy
+scikit-learn
+nilearn
+nibabel
+torch
+jupyter
+nbformat
+tqdm
+pytest

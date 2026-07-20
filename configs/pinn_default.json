@@ -1,0 +1,41 @@
+{
+  "random_seed": 20260717,
+  "hidden_layers": [
+    64,
+    64,
+    64
+  ],
+  "phase_1_epochs": 1200,
+  "phase_2_epochs": 3500,
+  "phase_1_learning_rate": 0.001,
+  "phase_2_network_learning_rate": 0.0003,
+  "phase_2_parameter_learning_rate": 0.0008,
+  "lambda_data": 1.0,
+  "lambda_physics_phase_1": 5.0,
+  "lambda_physics_phase_2": 20.0,
+  "lambda_initial": 100.0,
+  "lambda_terminal": 5.0,
+  "n_collocation": 700,
+  "residual_scale": 0.05,
+  "active_data_weight": 3.0,
+  "lbfgs_max_iterations": 300,
+  "initial_parameters": {
+    "epsilon": 0.12,
+    "tau": 1.2,
+    "alpha": 0.38
+  },
+  "parameter_bounds": {
+    "epsilon": [
+      0.03,
+      0.35
+    ],
+    "tau": [
+      0.5,
+      2.0
+    ],
+    "alpha": [
+      0.15,
+      0.6
+    ]
+  }
+}
