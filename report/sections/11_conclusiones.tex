@@ -1,0 +1,11 @@
+\chapter{Conclusiones}
+
+Se desarrolló un pipeline completo para estimar una HRF específica mediante una PINN inversa basada en Balloon--Windkessel. El trabajo integró teoría hemodinámica, extracción y limpieza de fMRI real, generación de datos sintéticos, comparadores GLM y MLP, diferenciación automática, optimización de parámetros, integración ODE, lotes experimentales, estadística y reproducibilidad.
+
+La primera PINN global mostró que una pérdida física baja no garantiza una respuesta repetible fuera de muestra. La reformulación de ventana, seguida por integración ODE independiente, resolvió este problema en la verificación controlada. En 60 experimentos sintéticos, la PINN recuperó señal, HRF y parámetros con alta precisión incluso a SNR 2, superando de forma consistente a los comparadores. Este resultado valida la implementación cuando el modelo inferencial coincide con el generador.
+
+En fMRI real del sujeto 100206, la PINN obtuvo el menor RMSE promedio y ganó cuatro de ocho direcciones. Las diferencias de error no alcanzaron significancia y las pruebas se interpretaron como exploratorias por dependencia entre direcciones y ausencia de múltiples sujetos. La MLP presentó la mayor brecha de generalización. La forma de las HRF PINN fue consistente entre bloques, pero $\epsilon$ y especialmente $\tau$ variaron, evidenciando identificabilidad práctica limitada.
+
+La respuesta a la pregunta de investigación es, por tanto, matizada: la PINN puede estimar una HRF interpretable y generalizable bajo condiciones sintéticas controladas; en datos reales entrega resultados promisorios y el menor error medio, pero aún no existe evidencia suficiente para afirmar superioridad general, causalidad de la restricción física o validez clínica.
+
+\resultbox{\textbf{Conclusión global.} El proyecto constituye una prueba de concepto metodológica sólida : demuestra desarrollo, diagnóstico y corrección de un método inverso fisiológico, y delimita con claridad qué resultados están verificados, cuáles son exploratorios y qué experimentos faltan para una validación científica más amplia.}

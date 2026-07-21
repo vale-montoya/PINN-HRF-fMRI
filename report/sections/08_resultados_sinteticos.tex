@@ -1,0 +1,112 @@
+\chapter{Resultados de la verificación sintética}
+
+\section{Comportamiento de los comparadores}
+El GLM reprodujo la forma general de los bloques, pero su HRF canónica fue más ancha y tardía que la respuesta operacional verdadera. El RMSE de señal permaneció alrededor de $0{,}41\%$ BOLD en los tres niveles, mientras el RMSE de HRF fue aproximadamente $0{,}122\%$.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{glm_synthetic_prediction.png}
+\caption{Predicción GLM de una señal sintética.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{glm_hrf_comparison.png}
+\caption{HRF canónica escalada frente al ground truth.}
+\end{subfigure}
+\caption{Comportamiento del GLM sintético.}
+\label{fig:glm_synthetic}
+\end{figure}
+
+La MLP obtuvo errores de bloque mucho menores que el GLM, especialmente en SNR 10 y 5. Sin embargo, la respuesta a un evento de un segundo presentó amplitud excesiva y $R^2$ de HRF negativo. Esto muestra que una buena reconstrucción de bloques de 12 segundos no implica aprender una HRF transferible a otra duración de entrada.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{mlp_synthetic_prediction.png}
+\caption{Predicción MLP del bloque retenido.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{mlp_hrf_comparison.png}
+\caption{HRF operacional inducida por la MLP.}
+\end{subfigure}
+\caption{La MLP reconstruye bien el bloque, pero no recupera la HRF verdadera.}
+\label{fig:mlp_synthetic}
+\end{figure}
+
+\section{Desempeño de la PINN en 60 experimentos}
+La distribución completa de errores se presenta en \cref{fig:pinn60_signal,fig:pinn60_hrf}. No se resume únicamente con una corrida favorable: cada punto corresponde a una combinación concreta de escenario, SNR y réplica.
+
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.92\textwidth]{pinn_60_experiments_signal.png}
+\caption{RMSE BOLD de las 60 PINN sintéticas. La línea de tendencia central y la dispersión muestran estabilidad frente al aumento de ruido.}
+\label{fig:pinn60_signal}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.92\textwidth]{pinn_60_experiments_hrf.png}
+\caption{RMSE de HRF en las 60 realizaciones. Incluso en SNR 2, los errores permanecen muy por debajo de los comparadores.}
+\label{fig:pinn60_hrf}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\caption{Resumen de desempeño de la PINN por SNR. Media $\pm$ desviación estándar para RMSE de señal; $n=20$ por nivel.}
+\label{tab:pinn_summary}
+\begin{tabular}{rrrrrr}
+\toprule
+\textbf{SNR} & \textbf{RMSE BOLD [\%]} & \textbf{$R^2$ BOLD} & \textbf{RMSE HRF [\%]} & \textbf{$R^2$ HRF} & \textbf{Tiempo [min]} \\
+\midrule
+10 & $0,0577\pm0,0234$ & 0,9922 & 0,0124 & 0,9923 & 2,09 \\
+5  & $0,0655\pm0,0263$ & 0,9900 & 0,0139 & 0,9902 & 2,09 \\
+2  & $0,0800\pm0,0428$ & 0,9836 & 0,0181 & 0,9826 & 2,09 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Las 60 corridas alcanzaron RMSE menor a $0{,}30\%$ y $R^2>0{,}80$. En 55 de 60, el error de $\tau$ fue menor a 20\%. La correlación media de señal fue superior a 0,999 en los tres niveles, pero este valor alto debe leerse junto con RMSE y $R^2$, porque la forma de bloque domina la correlación.
+
+\section{Comparación de señal}
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.86\textwidth]{synthetic_signal_rmse.png}
+\caption{RMSE fuera de muestra de GLM, MLP y PINN. Las barras de error corresponden a desviación estándar.}
+\label{fig:synthetic_signal_summary}
+\end{figure}
+
+La PINN redujo el RMSE respecto del GLM en 85,78\%, 84,02\% y 80,95\% para SNR 10, 5 y 2. Frente a la MLP, las reducciones fueron 25,97\%, 35,34\% y 60,65\%. La ventaja frente a la MLP aumentó con el ruido, un patrón consistente con un posible efecto regularizador de la dinámica impuesta. No se atribuye causalidad exclusivamente a la física porque no se incluyó una ablación con la misma arquitectura y $\lambda_p=0$.
+
+\section{Recuperación de HRF}
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.86\textwidth]{synthetic_hrf_rmse.png}
+\caption{RMSE de la HRF operacional por modelo y SNR. Las barras de error representan desviación estándar.}
+\label{fig:synthetic_hrf_summary}
+\end{figure}
+
+La PINN redujo el RMSE de HRF frente al GLM en 89,87\%, 88,62\% y 85,18\%; frente a la MLP, en 94,83\%, 94,10\% y 92,05\%. Este resultado es conceptualmente distinto de la predicción del bloque: la MLP podía reconstruir una entrada similar a la vista, pero no recuperar la respuesta del sistema a un evento estandarizado.
+
+\section{Recuperación de parámetros}
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.90\textwidth]{pinn_parameter_recovery_detailed.png}
+\caption{Errores relativos de $\epsilon$, $\tau$ y $\alpha$ en las 60 corridas PINN.}
+\label{fig:param_recovery_detailed}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.82\textwidth]{synthetic_parameter_error.png}
+\caption{Resumen de error de parámetros por SNR; barras de error: desviación estándar.}
+\label{fig:param_recovery_summary}
+\end{figure}
+
+$\alpha$ fue el parámetro más estable, con error medio entre 2,46\% y 2,84\%. $\epsilon$ aumentó de 7,15\% a 10,47\% al disminuir SNR. $\tau$ fue el más sensible, con 10,51\%, 9,88\% y 14,26\%. Esta jerarquía anticipó el comportamiento real.
+
+\section{Análisis estadístico}
+Friedman detectó diferencias globales de señal en SNR 10 ($\chi^2=32{,}5$, $p=8{,}76\times10^{-8}$), SNR 5 ($\chi^2=36{,}4$, $p=1{,}25\times10^{-8}$) y SNR 2 ($\chi^2=40$, $p=2{,}06\times10^{-9}$). Para HRF, $\chi^2=40$ y $p=2{,}06\times10^{-9}$ en los tres niveles.
+
+Las comparaciones Wilcoxon--Holm fueron significativas. Para señal, MLP frente a PINN obtuvo $p_{\mathrm{Holm}}=0{,}00233$ en SNR 10 y $0{,}000168$ en SNR 5, con tamaños de efecto biseriales 0,743 y 0,876 a favor de la PINN. La mayoría de las demás comparaciones tuvo $p_{\mathrm{Holm}}\approx6\times10^{-6}$ y $|r_{rb}|=1$, indicando predominio consistente.
+
+\resultbox{\textbf{Resultado sintético principal.} Bajo coincidencia entre modelo generador e inferencial, la PINN corrigió el problema del piloto global, predijo bloques retenidos mediante integración ODE, recuperó la HRF operacional y estimó parámetros con errores bajos en 60 experimentos.}

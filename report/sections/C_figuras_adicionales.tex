@@ -1,0 +1,35 @@
+\chapter{Figuras adicionales}
+
+\section{Señales reales ajustadas}
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.49\textwidth}\safegraphic[width=\linewidth]{real_adjusted_lr_m1_left.png}\caption{LR--M1 izquierda.}\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}\safegraphic[width=\linewidth]{real_adjusted_lr_m1_right.png}\caption{LR--M1 derecha.}\end{subfigure}
+\begin{subfigure}[t]{0.49\textwidth}\safegraphic[width=\linewidth]{real_adjusted_rl_m1_left.png}\caption{RL--M1 izquierda.}\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}\safegraphic[width=\linewidth]{real_adjusted_rl_m1_right.png}\caption{RL--M1 derecha.}\end{subfigure}
+\caption{Las cuatro señales después del ajuste por confusores.}
+\end{figure}
+
+\section{Repetibilidad por escenario}
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.49\textwidth}\safegraphic[width=\linewidth]{real_repeatability_lr_m1_left.png}\caption{LR--M1 izquierda.}\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}\safegraphic[width=\linewidth]{real_repeatability_lr_m1_right.png}\caption{LR--M1 derecha.}\end{subfigure}
+\begin{subfigure}[t]{0.49\textwidth}\safegraphic[width=\linewidth]{real_repeatability_rl_m1_left.png}\caption{RL--M1 izquierda.}\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}\safegraphic[width=\linewidth]{real_repeatability_rl_m1_right.png}\caption{RL--M1 derecha.}\end{subfigure}
+\caption{Comparación de los dos bloques de cada escenario. Los desfases óptimos son diagnósticos y no se aplican a la evaluación.}
+\end{figure}
+
+\section{Análisis exploratorio de calidad y error}
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.88\textwidth]{real_repeatability_vs_rmse.png}
+\caption{Relación exploratoria entre mejor correlación de bloques y RMSE bidireccional medio. Con $n=4$ no se obtuvo una tendencia concluyente.}
+\end{figure}
+
+\section{Desempeño GLM frente al ruido}
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.82\textwidth]{glm_noise_performance.png}
+\caption{Desempeño del GLM sintético según SNR.}
+\end{figure}

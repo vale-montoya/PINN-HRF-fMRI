@@ -1,0 +1,91 @@
+\chapter{Tablas completas de resultados}
+
+\section{Resultados reales por dirección}
+\begin{landscape}
+\small
+\begin{longtable}{p{4.2cm}cccrrrr}
+\caption{Métricas completas de prueba para los 24 ajustes reales.}\label{tab:real_full}\\
+\toprule
+\textbf{Escenario} & \textbf{Entrena} & \textbf{Prueba} & \textbf{Modelo} & \textbf{RMSE} & \textbf{MAE} & $R^2$ & $r$ \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Escenario} & \textbf{Entrena} & \textbf{Prueba} & \textbf{Modelo} & \textbf{RMSE} & \textbf{MAE} & $R^2$ & $r$ \\
+\midrule
+\endhead
+LR--M1 izquierda--mano derecha & $B_1$ & $B_2$ & GLM & 0.5261 & 0.4170 & 0.3232 & 0.6330 \\
+LR--M1 izquierda--mano derecha & $B_1$ & $B_2$ & MLP & 0.4537 & 0.3619 & 0.4967 & 0.8205 \\
+LR--M1 izquierda--mano derecha & $B_1$ & $B_2$ & PINN & 0.4409 & 0.3537 & 0.5247 & 0.8186 \\
+LR--M1 izquierda--mano derecha & $B_2$ & $B_1$ & GLM & 0.4867 & 0.4055 & 0.0861 & 0.5251 \\
+LR--M1 izquierda--mano derecha & $B_2$ & $B_1$ & MLP & 0.5096 & 0.3952 & -0.0021 & 0.8013 \\
+LR--M1 izquierda--mano derecha & $B_2$ & $B_1$ & PINN & 0.3233 & 0.2798 & 0.5967 & 0.8691 \\
+LR--M1 derecha--mano izquierda & $B_1$ & $B_2$ & GLM & 0.5514 & 0.4579 & -0.1121 & -0.2200 \\
+LR--M1 derecha--mano izquierda & $B_1$ & $B_2$ & MLP & 0.4694 & 0.3853 & 0.1941 & 0.5474 \\
+LR--M1 derecha--mano izquierda & $B_1$ & $B_2$ & PINN & 0.4957 & 0.4090 & 0.1011 & 0.6657 \\
+LR--M1 derecha--mano izquierda & $B_2$ & $B_1$ & GLM & 0.4894 & 0.4044 & -0.3761 & 0.1053 \\
+LR--M1 derecha--mano izquierda & $B_2$ & $B_1$ & MLP & 0.7092 & 0.5999 & -1.8891 & 0.5559 \\
+LR--M1 derecha--mano izquierda & $B_2$ & $B_1$ & PINN & 0.5522 & 0.4574 & -0.7518 & 0.5763 \\
+RL--M1 izquierda--mano derecha & $B_1$ & $B_2$ & GLM & 0.5537 & 0.4590 & 0.4278 & 0.7880 \\
+RL--M1 izquierda--mano derecha & $B_1$ & $B_2$ & MLP & 0.4497 & 0.3611 & 0.6225 & 0.8115 \\
+RL--M1 izquierda--mano derecha & $B_1$ & $B_2$ & PINN & 0.5302 & 0.4464 & 0.4754 & 0.7667 \\
+RL--M1 izquierda--mano derecha & $B_2$ & $B_1$ & GLM & 0.6239 & 0.5122 & 0.1167 & 0.5903 \\
+RL--M1 izquierda--mano derecha & $B_2$ & $B_1$ & MLP & 0.6004 & 0.4602 & 0.1821 & 0.6905 \\
+RL--M1 izquierda--mano derecha & $B_2$ & $B_1$ & PINN & 0.5092 & 0.4115 & 0.4116 & 0.7631 \\
+RL--M1 derecha--mano izquierda & $B_1$ & $B_2$ & GLM & 0.7144 & 0.5487 & -0.2263 & 0.5405 \\
+RL--M1 derecha--mano izquierda & $B_1$ & $B_2$ & MLP & 0.7246 & 0.6108 & -0.2614 & 0.7281 \\
+RL--M1 derecha--mano izquierda & $B_1$ & $B_2$ & PINN & 0.6185 & 0.4992 & 0.0807 & 0.8122 \\
+RL--M1 derecha--mano izquierda & $B_2$ & $B_1$ & GLM & 0.4844 & 0.4083 & 0.0375 & 0.7208 \\
+RL--M1 derecha--mano izquierda & $B_2$ & $B_1$ & MLP & 0.6001 & 0.5322 & -0.4771 & 0.7318 \\
+RL--M1 derecha--mano izquierda & $B_2$ & $B_1$ & PINN & 0.5451 & 0.4655 & -0.2186 & 0.7603 \\
+\bottomrule
+\end{longtable}
+\end{landscape}
+
+\section{Consistencia de parámetros reales}
+\begin{table}[H]
+\centering
+\small
+\caption{Estimaciones PINN desde cada bloque y diferencia simétrica.}
+\begin{tabularx}{\textwidth}{Xrrrrrrrrr}
+\toprule
+& \multicolumn{3}{c}{$\epsilon$} & \multicolumn{3}{c}{$\tau$} & \multicolumn{3}{c}{$\alpha$}\\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}\cmidrule(lr){8-10}
+\textbf{Escenario} & $B_1$ & $B_2$ & $d_{sym}$ & $B_1$ & $B_2$ & $d_{sym}$ & $B_1$ & $B_2$ & $d_{sym}$ \\
+\midrule
+LR--M1 izq. & 0,094 & 0,075 & 23,5\% & 0,723 & 0,793 & 9,2\% & 0,346 & 0,399 & 14,3\%\\
+LR--M1 der. & 0,031 & 0,037 & 18,9\% & 0,635 & 0,660 & 3,8\% & 0,551 & 0,511 & 7,6\%\\
+RL--M1 izq. & 0,086 & 0,128 & 39,6\% & 0,722 & 1,766 & 83,9\% & 0,379 & 0,358 & 5,9\%\\
+RL--M1 der. & 0,077 & 0,139 & 57,8\% & 1,423 & 0,726 & 64,9\% & 0,405 & 0,342 & 17,0\%\\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Comparaciones reales pareadas}
+\begin{table}[H]
+\centering
+\caption{Wilcoxon pareado con corrección de Holm para RMSE real.}
+\begin{tabular}{lrrr}
+\toprule
+\textbf{Comparación} & \textbf{Diferencia media} & $p_{\mathrm{Holm}}$ & $r_{rb}$\\
+\midrule
+GLM--MLP & -0,0108 & 1,000 & 0,000\\
+GLM--PINN & 0,0519 & 0,328 & 0,611\\
+MLP--PINN & 0,0627 & 0,328 & 0,667\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Pruebas de Friedman reales; interpretación exploratoria.}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Métrica} & $\chi^2$ & $p$\\
+\midrule
+RMSE & 3,00 & 0,2231\\
+MAE & 3,25 & 0,1969\\
+$R^2$ & 3,00 & 0,2231\\
+Pearson & 9,75 & 0,0076\\
+\bottomrule
+\end{tabular}
+\end{table}

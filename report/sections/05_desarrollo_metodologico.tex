@@ -1,0 +1,88 @@
+\chapter{Desarrollo metodológico}
+
+\section{Comparador GLM}
+El GLM sintético utilizó una HRF canónica de SPM, regresores de tarea y deriva de coseno con corte alto de $0{,}008$ Hz. Los coeficientes se estimaron por mínimos cuadrados ordinarios usando únicamente puntos fuera de la ventana retenida. La predicción del bloque de prueba se obtuvo evaluando el diseño completo con los coeficientes aprendidos.
+
+Para estimar una HRF comparable se aplicó el coeficiente de tarea del GLM a la HRF canónica. Esta definición conserva la forma fija del modelo y permite calcular RMSE, correlación, error de pico y error de tiempo al pico respecto del ground truth.
+
+\section{Comparador MLP}
+La MLP recibió una representación de historia temporal del estímulo. Para cada instante se formó un vector con los valores de estímulo de los \SI{32}{s} previos en sintético y \SI{24}{s} en real. La red sintética utilizó capas de 64 y 32 neuronas con activación \texttt{tanh}; la versión real utilizó 32 y 16 neuronas para reducir capacidad frente al menor tamaño efectivo de muestra.
+
+El entrenamiento utilizó AdamW, tasa inicial $10^{-3}$, decaimiento de peso $10^{-4}$ en sintético y $10^{-3}$ en real, máximo de 2500 épocas, 20\% de validación y detención temprana con paciencia 200. Los puntos de estímulo activo recibieron peso 3 para evitar que la gran cantidad de línea base dominara la pérdida.
+
+La HRF de la MLP se obtuvo presentando un evento estandarizado de un segundo al modelo entrenado. Este procedimiento prueba si la representación aprendida se transfiere desde bloques de 12 segundos a una entrada corta no observada.
+
+\section{Primera formulación PINN: red global en el tiempo}
+La primera PINN representaba $s,f,v,q$ en toda la corrida como funciones del tiempo. Se optimizaron simultáneamente los pesos y $\epsilon$, $\tau$, $\alpha$. La arquitectura fue una red de tres capas ocultas de 48 neuronas, activación \texttt{tanh}, precisión de 64 bits y 420 puntos de colocación densos. Se ejecutaron 800 épocas iniciales y 2200 épocas de ajuste conjunto.
+
+Los residuos físicos alcanzaron valores bajos y la señal de entrenamiento se ajustó razonablemente. Sin embargo, el bloque repetido generado por la red tenía una amplitud distinta del primero. En el piloto SNR 5, el RMSE de prueba fue $0{,}5947\%$ y $R^2=0{,}287$. Los parámetros estimados fueron $\epsilon=0{,}0726$, $\tau=0{,}8145$ y $\alpha=0{,}2593$.
+
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.95\textwidth]{pinn_pilot_failure.png}
+\caption{Diagnóstico del primer piloto PINN. La red reproduce el primer bloque, pero no impone que una entrada repetida produzca una respuesta dinámica idéntica fuera de la zona informada por datos.}
+\label{fig:pinn_failure}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.95\textwidth]{pinn_pilot_states.png}
+\caption{Estados latentes de la formulación global. Residuos locales pequeños no garantizan una trayectoria global única o una respuesta repetible.}
+\label{fig:pinn_failure_states}
+\end{figure}
+
+Al integrar las ODE de manera independiente con los parámetros estimados, el resultado mejoró a RMSE $0{,}376\%$ y $R^2=0{,}714$. Este hallazgo mostró que la estimación paramétrica contenía información útil, pero la trayectoria libre de la red era el principal problema.
+
+\section{Reformulación: PINN inversa de ventana}
+La versión final separó dos tareas:
+\begin{enumerate}
+  \item \textbf{inferencia}: aprender estados y parámetros dentro de la ventana del bloque de entrenamiento;
+  \item \textbf{predicción}: integrar las ODE desde el estado basal con los parámetros inferidos y el estímulo del bloque de prueba.
+\end{enumerate}
+
+La red dejó de ser el predictor final fuera de muestra. Su función se restringió a resolver el problema inverso en una ventana informativa. La simulación del bloque retenido se realizó con \texttt{solve\_ivp} y tolerancias estrictas. Esta arquitectura se denomina en el trabajo \emph{PINN inversa Balloon--Windkessel con simulación fisiológica fuera de muestra}.
+
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.96\textwidth]{pinn_corrected_prediction.png}
+\caption{Ejemplo sintético de la formulación corregida. El bloque sombreado no fue generado por la red; se predijo integrando las ODE con los parámetros inferidos.}
+\label{fig:pinn_corrected}
+\end{figure}
+
+En el piloto SNR 5, la versión corregida estimó $\epsilon=0{,}1374$, $\tau=0{,}9475$ y $\alpha=0{,}3343$, con errores relativos de 8,43\%, 3,31\% y 4,46\%. La predicción retenida alcanzó RMSE $0{,}0730\%$, $R^2=0{,}9893$ y $r=0{,}99998$.
+
+\section{Función de pérdida}
+La red representa estados transformados para mantener positividad de $f,v,q$. La señal BOLD se calcula a partir de $v$ y $q$, no como una salida libre. La pérdida de datos es
+\begin{equation}
+\mathcal L_d=\frac{1}{N_d}\sum_i w_i\left[\hat y(t_i)-y_i\right]^2,
+\end{equation}
+donde $w_i=3$ durante el estímulo activo y 1 en línea base.
+
+Los residuos físicos se definen sustituyendo las salidas y derivadas automáticas en \cref{eq:balloon}. Tras escalarlos para equilibrar magnitudes,
+\begin{equation}
+\mathcal L_p=\frac{1}{N_c}\sum_j\sum_{m\in\{s,f,v,q\}} \tilde r_m(t_j)^2.
+\end{equation}
+
+La condición inicial impone homeostasis; el término terminal favorece recuperación hacia el basal al final de la ventana:
+\begin{align}
+\mathcal L_i &= \hat s(0)^2+[\hat f(0)-1]^2+[\hat v(0)-1]^2+[\hat q(0)-1]^2,\\
+\mathcal L_t &= \hat s(T)^2+[\hat f(T)-1]^2+[\hat v(T)-1]^2+[\hat q(T)-1]^2.
+\end{align}
+
+\section{Parámetros acotados}
+Para evitar valores no fisiológicos, cada parámetro se representó mediante una variable libre $\xi$ y una transformación sigmoidal:
+\begin{equation}
+\theta=\theta_{\min}+(\theta_{\max}-\theta_{\min})\sigma(\xi).
+\end{equation}
+
+Los límites sintéticos fueron $\epsilon\in[0{,}05,0{,}30]$, $\tau\in[0{,}5,2{,}0]$ y $\alpha\in[0{,}15,0{,}60]$. En real se amplió el límite inferior de $\epsilon$ a 0,03. Una solución cercana a una cota se interpreta como señal de identificabilidad limitada, no como evidencia de que el valor real sea exactamente ese límite.
+
+\section{Optimización por etapas}
+La PINN final utilizó tres capas ocultas de 64 neuronas, activación \texttt{tanh} y precisión \texttt{float64}. La optimización se dividió en:
+\begin{enumerate}
+  \item Adam, 1200 épocas, tasa $10^{-3}$ y $\lambda_p=5$;
+  \item Adam, 3500 épocas, tasa de red $3\times10^{-4}$, tasa de parámetros $8\times10^{-4}$ y $\lambda_p=20$;
+  \item L-BFGS, hasta 300 iteraciones, para refinamiento determinista.
+\end{enumerate}
+
+Se usaron $\lambda_d=1$, $\lambda_i=100$, $\lambda_t=5$, 700 puntos de colocación, escala de residuos 0,05 e inicialización $\epsilon=0{,}12$, $\tau=1{,}20$, $\alpha=0{,}38$. La mayor ponderación inicial evita que la red explique la señal desplazando los estados basales.

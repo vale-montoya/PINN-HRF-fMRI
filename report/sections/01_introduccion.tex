@@ -1,31 +1,54 @@
-\section{Introducción}
+\chapter{Introducción}
 
-La resonancia magnética funcional (fMRI) permite estudiar cambios asociados a la actividad cerebral mediante la señal BOLD. Esta señal no mide directamente la descarga neuronal, sino que refleja una respuesta vascular y metabólica con dinámica temporal propia. Por ello, el análisis de fMRI requiere un modelo que relacione el estímulo experimental con la respuesta hemodinámica observada.
+\section{Contexto}
+La fMRI es una de las herramientas más utilizadas para estudiar la organización funcional del cerebro humano de manera no invasiva. Sin embargo, su señal no corresponde a una medición directa de actividad eléctrica neuronal. El contraste BOLD surge de cambios combinados en flujo sanguíneo, volumen vascular y concentración de desoxihemoglobina, de modo que la relación entre una tarea experimental y la señal observada está mediada por una respuesta hemodinámica dinámica \citep{Buxton1998,Friston2000}.
 
-El enfoque más utilizado es el modelo lineal general, en el cual los eventos se convolucionan con una HRF canónica y luego se ajustan a la señal observada. Esta representación ha sido fundamental para el análisis de fMRI, pero supone una forma temporal común que no necesariamente captura variaciones locales o individuales \citep{Friston1998,Glover1999}. Además, se han descrito no linealidades y efectos de saturación que pueden limitar la aproximación de convolución lineal en determinados paradigmas \citep{Friston2000}.
+En el análisis convencional, los eventos experimentales se convolucionan con una HRF canónica y luego se ajusta un GLM. Esta estrategia es eficiente, interpretable y ampliamente validada, pero supone que la forma de la respuesta es suficientemente parecida a una plantilla fija. En la práctica, la HRF varía entre regiones, sujetos, sesiones y estados fisiológicos; además, puede presentar diferencias de latencia, amplitud, ancho y posestímulo \citep{Handwerker2004,Neumann2003,Rangaprakash2018}. Una plantilla incorrecta puede disminuir sensibilidad estadística, alterar las estimaciones de amplitud o desplazar temporalmente la respuesta \citep{Lindquist2009,LindquistWager2007}.
 
-Una alternativa consiste en representar explícitamente la dinámica neurovascular mediante el modelo Balloon--Windkessel, que describe la evolución del flujo sanguíneo, volumen venoso y contenido de desoxihemoglobina \citep{Buxton1998,Friston2000}. Sin embargo, estimar sus estados y parámetros a partir de una señal BOLD ruidosa corresponde a un problema inverso potencialmente mal condicionado.
+Paralelamente, las redes neuronales ofrecen flexibilidad para aprender relaciones no lineales, pero una red puramente basada en datos puede ajustar ruido o características particulares del bloque de entrenamiento sin preservar una interpretación fisiológica. Las PINN constituyen una alternativa intermedia: usan redes neuronales para representar estados o soluciones, pero incorporan ecuaciones diferenciales en la función de pérdida \citep{Raissi2019}. En problemas inversos, esta formulación puede estimar simultáneamente estados no observados y parámetros desconocidos.
 
-Las redes neuronales informadas por la física incorporan ecuaciones diferenciales en la función de pérdida, combinando observaciones con conocimiento mecanístico \citep{Raissi2019}. En este proyecto se estudia si esta estrategia permite estimar una HRF y parámetros efectivos con mayor robustez que un GLM y una MLP puramente basada en datos.
-
-\subsection{Pregunta de investigación}
-
-¿Puede una PINN que incorpore el modelo Balloon--Windkessel estimar la respuesta hemodinámica y predecir bloques BOLD no utilizados durante el entrenamiento con mayor robustez e interpretabilidad que un GLM canónico y una MLP sin restricciones fisiológicas?
-
-\subsection{Objetivo general}
-
-Desarrollar y evaluar una PINN inversa para estimar la HRF y parámetros efectivos del modelo Balloon--Windkessel a partir de señales fMRI BOLD, comparando su desempeño con un GLM y una MLP en datos sintéticos y reales.
-
-\subsection{Objetivos específicos}
-
+\section{Problema abordado}
+El desafío central es inferir una respuesta hemodinámica que cumpla tres condiciones:
 \begin{enumerate}
-    \item Implementar el modelo Balloon--Windkessel y generar señales sintéticas con parámetros conocidos y ruido estructurado.
-    \item Diseñar una PINN que combine error de datos, residuos fisiológicos y condiciones iniciales.
-    \item Comparar GLM, MLP y PINN mediante evaluación fuera de muestra y recuperación de la HRF.
-    \item Aplicar el método a datos motores del Human Connectome Project.
-    \item Analizar la consistencia de la HRF y de los parámetros inferidos, además de sus limitaciones.
+  \item describir adecuadamente la señal BOLD observada;
+  \item respetar una dinámica neurovascular plausible;
+  \item generalizar a una repetición del estímulo no utilizada en el entrenamiento.
 \end{enumerate}
 
-\subsection{Contribuciones del trabajo}
+Esta última condición es fundamental. Una curva puede ajustarse muy bien al bloque observado y, aun así, no representar una HRF estable. Por ello, el problema no se formuló como una reconstrucción global de la señal, sino como una tarea de inferencia de parámetros y predicción fuera de muestra.
 
-La contribución principal es una metodología de validación en dos niveles. Primero, se comprueba la recuperabilidad de la HRF y de parámetros conocidos en un entorno sintético. Segundo, se evalúa generalización real mediante entrenamiento y prueba en bloques distintos. Esta separación evita confundir un buen ajuste dentro de muestra con identificación fisiológica o capacidad predictiva.
+\section{Pregunta de investigación}
+\resultbox{\textbf{Pregunta central.} ¿Puede una PINN basada en el modelo Balloon--Windkessel estimar una HRF interpretable y parámetros hemodinámicos efectivos que generalicen mejor a un bloque fMRI retenido que un GLM canónico y una MLP puramente basada en datos?}
+
+La palabra \emph{mejor} se evalúa en dos niveles. En datos sintéticos, donde existe ground truth, comprende recuperación de señal, HRF y parámetros. En datos reales, donde no existe una HRF verdadera observable, se limita a predicción entre bloques, consistencia y plausibilidad bajo el modelo.
+
+\section{Objetivo general}
+Desarrollar y evaluar una PINN inversa para estimar la HRF y parámetros efectivos del modelo Balloon--Windkessel a partir de señales fMRI BOLD, comparando su desempeño con un GLM canónico y una MLP en datos sintéticos controlados y en una aplicación real del HCP.
+
+\section{Objetivos específicos}
+\begin{enumerate}
+  \item Implementar el modelo Balloon--Windkessel y verificar su comportamiento basal y su respuesta ante estímulos.
+  \item Extraer y preparar señales BOLD de M1 izquierda y derecha en una tarea motora HCP.
+  \item Construir un conjunto sintético con parámetros conocidos, ruido estructurado y bloques retenidos.
+  \item Implementar comparadores GLM y MLP bajo un criterio común de evaluación fuera de muestra.
+  \item Diseñar una PINN inversa que estime estados latentes y los parámetros $\epsilon$, $\tau$ y $\alpha$.
+  \item Diagnosticar las limitaciones de una primera formulación PINN global y reformular la predicción mediante integración ODE independiente.
+  \item Ejecutar 60 experimentos sintéticos por modelo y ocho evaluaciones reales direccionales por modelo.
+  \item Analizar errores, correlaciones, recuperación de HRF, identificabilidad de parámetros y brecha de generalización.
+  \item Publicar un repositorio reproducible con código modular, notebooks, configuraciones, resultados, pruebas e informe.
+\end{enumerate}
+
+\section{Contribuciones del trabajo}
+Las contribuciones concretas son:
+\begin{itemize}
+  \item una formulación inversa neurovascular con estados latentes y parámetros acotados;
+  \item un diagnóstico explícito de una solución de física blanda que no generalizaba;
+  \item una estrategia de evaluación estricta, donde la red no genera directamente el bloque de prueba;
+  \item una verificación sintética extensa, con 60 realizaciones y tres niveles de ruido;
+  \item una aplicación real bidireccional sobre cuatro escenarios corrida--ROI;
+  \item una comparación diferenciada entre precisión predictiva e interpretabilidad de la HRF;
+  \item un análisis honesto de dependencia estadística, especificación del modelo e identificabilidad.
+\end{itemize}
+
+\section{Organización del informe}
+El informe presenta primero los fundamentos fisiológicos y computacionales; luego describe los datos reales y sintéticos; documenta la evolución metodológica desde los comparadores hasta la PINN corregida; detalla la implementación y el diseño experimental; reporta los resultados sintéticos y reales; y finaliza con una discusión crítica, conclusiones y apéndices de reproducibilidad, tablas completas y figuras adicionales.

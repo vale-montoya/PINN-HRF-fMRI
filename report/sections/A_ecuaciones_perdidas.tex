@@ -1,0 +1,34 @@
+\chapter{Detalle matemático de la PINN}
+
+\section{Residuos diferenciales}
+Sea $\hat{\bm z}_\theta(t)=[\hat s,\hat f,\hat v,\hat q]$. Los residuos no escalados son:
+\begin{align}
+r_s &= \frac{d\hat s}{dt}-\left[\epsilon u-\kappa_s\hat s-\kappa_f(\hat f-1)\right],\\
+r_f &= \frac{d\hat f}{dt}-\hat s,\\
+r_v &= \tau\frac{d\hat v}{dt}-\left(\hat f-\hat v^{1/\alpha}\right),\\
+r_q &= \tau\frac{d\hat q}{dt}-\left\{\frac{\hat f}{E_0}\left[1-(1-E_0)^{1/\hat f}\right]-\hat v^{1/\alpha}\frac{\hat q}{\hat v}\right\}.
+\end{align}
+
+Las potencias y divisiones se calculan con pisos numéricos pequeños para evitar valores no definidos durante las primeras iteraciones. El BOLD se deriva con \cref{eq:bold}; no se agrega una salida BOLD independiente.
+
+\section{Pérdida completa}
+\begin{align}
+\mathcal L_d &= \frac{1}{N_d}\sum_i w_i(\hat y_i-y_i)^2,\\
+\mathcal L_p &= \frac{1}{N_c}\sum_j\left[(c_sr_s)^2+(c_fr_f)^2+(c_vr_v)^2+(c_qr_q)^2\right],\\
+\mathcal L_i &= \hat s_0^2+(\hat f_0-1)^2+(\hat v_0-1)^2+(\hat q_0-1)^2,\\
+\mathcal L_t &= \hat s_T^2+(\hat f_T-1)^2+(\hat v_T-1)^2+(\hat q_T-1)^2,\\
+\mathcal L &= \lambda_d\mathcal L_d+\lambda_p\mathcal L_p+\lambda_i\mathcal L_i+\lambda_t\mathcal L_t.
+\end{align}
+
+\section{Algoritmo}
+\begin{enumerate}
+  \item construir la ventana de entrenamiento y normalizar tiempo;
+  \item inicializar red, parámetros libres y semillas;
+  \item optimizar datos, física y homeostasis con Adam fase 1;
+  \item aumentar peso físico y optimizar red y parámetros con tasas separadas;
+  \item refinar con L-BFGS;
+  \item transformar variables libres a parámetros acotados;
+  \item integrar Balloon--Windkessel con el estímulo del bloque retenido;
+  \item calcular métricas solo en la ventana de evaluación;
+  \item simular un evento de un segundo para obtener la HRF operacional.
+\end{enumerate}

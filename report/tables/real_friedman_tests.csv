@@ -1,0 +1,5 @@
+metric,preferred_direction,n_pairs,friedman_statistic,p_value
+test_rmse_percent,lower,8,3.0,0.2231301601484298
+test_mae_percent,lower,8,3.25,0.196911675204194
+test_r2,higher,8,3.0,0.2231301601484298
+test_pearson_r,higher,8,9.75,0.0076350942188599

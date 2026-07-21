@@ -1,0 +1,143 @@
+\chapter{Datos fMRI reales y preprocesamiento}
+
+\section{Conjunto Human Connectome Project}
+Se utilizaron datos de tarea motora del HCP Young Adult, un recurso de neuroimagen multimodal con adquisición y preprocesamiento estandarizados \citep{VanEssen2013,Glasser2013,Barch2013}. La aplicación real se restringió al sujeto 100206 como prueba de concepto metodológica. Las corridas seleccionadas fueron \texttt{tfMRI\_MOTOR\_LR} y \texttt{tfMRI\_MOTOR\_RL}, que difieren en dirección de codificación de fase.
+
+Cada volumen preprocesado tenía dimensiones $91\times109\times91$, resolución isotrópica de \SI{2}{mm}, 284 volúmenes y tiempo de repetición $TR=\SI{0.72}{s}$. La duración total fue aproximadamente \SI{203.76}{s}. Las condiciones motoras incluyeron movimientos de mano izquierda, mano derecha, pie izquierdo, pie derecho, lengua y claves visuales.
+
+\section{Regiones de interés}
+Se definieron dos ROI esféricas de radio \SI{6}{mm} en espacio MNI:
+\begin{table}[H]
+\centering
+\caption{Regiones de interés motoras utilizadas.}
+\label{tab:roi}
+\begin{tabular}{lccc}
+\toprule
+\textbf{ROI} & $x$ [mm] & $y$ [mm] & $z$ [mm] \\
+\midrule
+M1 izquierda & -38 & -22 & 56 \\
+M1 derecha & 38 & -22 & 56 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+La condición objetivo se eligió de forma contralateral: movimiento de mano derecha para M1 izquierda y movimiento de mano izquierda para M1 derecha. Se analizaron cuatro escenarios, detallados en \cref{tab:real_scenarios}.
+
+\begin{table}[H]
+\centering
+\caption{Escenarios reales y bloques objetivo.}
+\label{tab:real_scenarios}
+\begin{tabularx}{\textwidth}{l l l l X}
+\toprule
+\textbf{Escenario} & \textbf{Corrida} & \textbf{ROI} & \textbf{Condición} & \textbf{Inicios de bloques [s]} \\
+\midrule
+LR--M1 izquierda & LR & M1 izquierda & mano derecha & 11,009; 131,892 \\
+LR--M1 derecha & LR & M1 derecha & mano izquierda & 71,517; 162,013 \\
+RL--M1 izquierda & RL & M1 izquierda & mano derecha & 86,498; 162,000 \\
+RL--M1 derecha & RL & M1 derecha & mano izquierda & 10,996; 116,619 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Cada bloque tenía una duración nominal de \SI{12}{s}. Esta estructura de dos bloques por escenario permitió entrenar con uno y evaluar con el otro.
+
+\section{Verificación inicial de datos}
+Antes de modelar se verificaron dimensiones, afinidad espacial, número de volúmenes, archivos de eventos y regresores de movimiento. La señal regional se calculó promediando los vóxeles de cada esfera y se expresó como cambio BOLD fraccional respecto de su media. Posteriormente se eliminó una tendencia lineal global.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{raw_lr_m1_left.png}
+\caption{LR, M1 izquierda, mano derecha.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{raw_lr_m1_right.png}
+\caption{LR, M1 derecha, mano izquierda.}
+\end{subfigure}
+\caption{Señales BOLD regionales iniciales de la corrida LR. Las bandas corresponden a los bloques objetivo.}
+\label{fig:raw_lr}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{raw_rl_m1_left.png}
+\caption{RL, M1 izquierda, mano derecha.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{raw_rl_m1_right.png}
+\caption{RL, M1 derecha, mano izquierda.}
+\end{subfigure}
+\caption{Señales BOLD regionales iniciales de la corrida RL.}
+\label{fig:raw_rl}
+\end{figure}
+
+Estas figuras demuestran que la señal contiene respuestas compatibles con la tarea, pero también variaciones no objetivo, deriva y fluctuaciones de amplitud entre bloques. La preparación real no podía reducirse a recortar dos ventanas sin controlar confusores.
+
+\section{GLM basal de corrida completa}
+Como diagnóstico inicial se construyó un GLM de 22 columnas: seis regresores de tarea convolucionados con HRF canónica, doce regresores de movimiento, tres componentes de deriva y una constante. Las matrices se muestran en \cref{fig:glm_design}. La condición objetivo presentó betas contralaterales positivas en los cuatro escenarios: $0{,}838\%$ y $1{,}037\%$ para M1 izquierda en LR y RL; $0{,}372\%$ y $0{,}940\%$ para M1 derecha.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{glm_design_lr.png}
+\caption{Diseño LR.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{glm_design_rl.png}
+\caption{Diseño RL.}
+\end{subfigure}
+\caption{Matrices de diseño del GLM basal. Incluyen tareas, movimiento, deriva y constante.}
+\label{fig:glm_design}
+\end{figure}
+
+Los $R^2$ de este análisis fueron valores dentro de muestra y se utilizaron solo como control de consistencia. Los estadísticos clásicos deben interpretarse con cautela porque no se modeló explícitamente la autocorrelación temporal, un aspecto relevante en fMRI \citep{Woolrich2001}.
+
+\section{Ajuste por confusores}
+Para cada escenario se construyó un GLM de confusores con:
+\begin{itemize}
+  \item todas las condiciones de tarea no objetivo;
+  \item doce regresores de movimiento;
+  \item deriva de coseno con corte alto de $0{,}008$ Hz;
+  \item constante.
+\end{itemize}
+
+La matriz tenía 21 columnas, rango completo y condición entre aproximadamente 180 y 225. El ajuste se realizó fuera de ventanas ampliadas alrededor de los bloques objetivo, usando 190 puntos. Luego se sustrajo únicamente la contribución estimada de los confusores. Así se evitó que el modelo de limpieza absorbiera la respuesta que posteriormente debía ser predicha.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{real_adjusted_lr_m1_left.png}
+\caption{LR--M1 izquierda.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{real_adjusted_rl_m1_left.png}
+\caption{RL--M1 izquierda.}
+\end{subfigure}
+\caption{Ejemplos de señal original y señal ajustada por confusores. El ajuste preserva los bloques objetivo y reduce variación explicada por condiciones no objetivo, movimiento y deriva.}
+\label{fig:real_adjusted_examples}
+\end{figure}
+
+\section{Ventanas y corrección de línea base}
+Cada ventana incluyó \SI{8}{s} preestímulo y \SI{20}{s} posteriores al término del bloque. La evaluación principal se restringió a $0$--\SI{24}{s} desde el inicio. En una versión piloto se intentó extrapolar linealmente la línea base preestímulo; esa estrategia deformó las respuestas reales cuando existía una pendiente local. La versión final sustrajo únicamente la mediana preestímulo y conservó la pendiente como diagnóstico.
+
+\section{Repetibilidad de los bloques}
+Se compararon los dos bloques de cada escenario sin desplazar la evaluación. Se calculó correlación a desfase cero, mejor correlación exploratoria dentro de $\pm4$ volúmenes, amplitudes máximas, desviación basal y una razón respuesta--ruido. Los desfases se utilizaron para describir variabilidad temporal, no para alinear artificialmente las señales.
+
+\begin{table}[H]
+\centering
+\caption{Control de calidad de los cuatro escenarios reales.}
+\label{tab:quality_real}
+\begin{tabularx}{\textwidth}{Xrrrrl}
+\toprule
+\textbf{Escenario} & $r_0$ & $r_{\max}$ & \textbf{Desfase [s]} & \textbf{RNR} & \textbf{Calidad} \\
+\midrule
+LR--M1 izquierda & 0,603 & 0,647 & 2,16 & 3,417 & buena \\
+LR--M1 derecha & 0,232 & 0,307 & 2,16 & 2,440 & moderada \\
+RL--M1 izquierda & 0,720 & 0,758 & 0,72 & 4,523 & buena \\
+RL--M1 derecha & 0,716 & 0,756 & -1,44 & 3,344 & buena \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+La baja repetibilidad de LR--M1 derecha anticipa que cualquier modelo tendrá dificultad para aprender desde un bloque y predecir el otro. Este control de calidad es una parte del resultado, no un paso meramente técnico.

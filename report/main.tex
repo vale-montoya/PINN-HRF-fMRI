@@ -1,13 +1,13 @@
-\documentclass[11pt,a4paper]{article}
+\documentclass[11pt,a4paper,oneside]{report}
 
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[spanish,es-noshorthands]{babel}
 \usepackage{lmodern}
-\usepackage[a4paper,margin=2.4cm]{geometry}
+\usepackage[a4paper,top=2.3cm,bottom=2.4cm,left=2.4cm,right=2.4cm]{geometry}
 \usepackage{microtype}
 \usepackage{setspace}
-\usepackage{amsmath,amssymb,bm}
+\usepackage{amsmath,amssymb,bm,mathtools}
 \usepackage{booktabs,longtable,tabularx,array,multirow}
 \usepackage{siunitx}
 \usepackage{graphicx}
@@ -16,19 +16,32 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{float}
+\usepackage{pdflscape}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,fit,calc}
+\usepackage{listings}
 \usepackage[numbers,sort&compress]{natbib}
 \usepackage[hidelinks]{hyperref}
 \usepackage[nameinlink,noabbrev]{cleveref}
+\usepackage{fancyhdr}
+\usepackage{etoolbox}
 
 \definecolor{uvblue}{HTML}{174A7E}
+\definecolor{uvlight}{HTML}{EAF1F8}
 \definecolor{softgray}{HTML}{F3F5F7}
 \definecolor{darkgray}{HTML}{3B4148}
+\definecolor{accentgreen}{HTML}{2E7D68}
+\definecolor{accentorange}{HTML}{C56A23}
+\definecolor{codebg}{HTML}{F7F8FA}
 
 \hypersetup{
   pdftitle={Estimación robusta de la HRF en fMRI mediante PINNs},
-  pdfauthor={Valentinna Belén Montoya Aising}
+  pdfauthor={Valentinna Belén Montoya Aising},
+  pdfsubject={Proyecto final BME513 Inteligencia Artificial en Salud},
+  colorlinks=true,
+  linkcolor=uvblue,
+  citecolor=uvblue,
+  urlcolor=uvblue
 }
 
 \sisetup{
@@ -38,11 +51,36 @@
   detect-all
 }
 
-\setstretch{1.15}
+\setstretch{1.16}
 \setlength{\parindent}{0pt}
-\setlength{\parskip}{0.55em}
-\setlist[itemize]{topsep=0.25em,itemsep=0.2em}
-\setlist[enumerate]{topsep=0.25em,itemsep=0.2em}
+\setlength{\parskip}{0.58em}
+\setlist[itemize]{topsep=0.25em,itemsep=0.18em,leftmargin=1.5em}
+\setlist[enumerate]{topsep=0.25em,itemsep=0.18em,leftmargin=1.7em}
+\captionsetup{font=small,labelfont=bf,justification=justified,singlelinecheck=false}
+\graphicspath{{figures/}}
+
+\setlength{\headheight}{13.6pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small PINN--HRF en fMRI}
+\fancyhead[R]{\small \leftmark}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{codebg},
+  frame=single,
+  rulecolor=\color{darkgray!30},
+  breaklines=true,
+  columns=fullflexible,
+  showstringspaces=false,
+  keywordstyle=\color{uvblue}\bfseries,
+  commentstyle=\color{accentgreen},
+  stringstyle=\color{accentorange},
+  xleftmargin=0.5em,
+  xrightmargin=0.5em
+}
 
 \newcommand{\projecttitle}{Estimación robusta de la función de respuesta hemodinámica en fMRI mediante redes neuronales informadas por la física}
 \newcommand{\authorname}{Valentinna Belén Montoya Aising}
@@ -50,17 +88,27 @@
 \newcommand{\coursename}{BME513 -- Inteligencia Artificial en Salud}
 \newcommand{\professorname}{Dr. Alejandro Veloz Baeza}
 \newcommand{\repositoryurl}{https://github.com/Vale-Montoya/PINN-HRF-fMRI}
-\newcommand{\presentationurl}{Pendiente de incorporar}
+
+\newcommand{\resultbox}[1]{%
+\begin{center}
+\fcolorbox{uvblue}{uvlight}{\parbox{0.92\textwidth}{#1}}
+\end{center}}
+
+\newcommand{\cautionbox}[1]{%
+\begin{center}
+\fcolorbox{accentorange}{accentorange!8}{\parbox{0.92\textwidth}{#1}}
+\end{center}}
+
+\newcommand{\methodbox}[1]{%
+\begin{center}
+\fcolorbox{accentgreen}{accentgreen!7}{\parbox{0.92\textwidth}{#1}}
+\end{center}}
 
 \newcommand{\safegraphic}[2][]{%
-  \IfFileExists{#2}{\includegraphics[#1]{#2}}{%
-    \fbox{\parbox[c][5cm][c]{0.9\linewidth}{\centering Figura pendiente\\\texttt{#2}}}%
+  \IfFileExists{figures/#2}{\includegraphics[#1]{#2}}{%
+    \fbox{\parbox[c][5cm][c]{0.9\linewidth}{\centering Figura no encontrada\\\texttt{#2}}}%
   }%
 }
-
-\title{\projecttitle}
-\author{\authorname}
-\date{Julio de 2026}
 
 \begin{document}
 \hypersetup{pageanchor=false}
@@ -68,14 +116,14 @@
 \begin{titlepage}
 \centering
 {\large Universidad de Valparaíso\par}
-\vspace{0.3cm}
+\vspace{0.25cm}
 {\large \programname\par}
-\vspace{1.4cm}
-{\color{uvblue}\rule{\linewidth}{1.2pt}\par}
-\vspace{0.7cm}
+\vspace{1.35cm}
+{\color{uvblue}\rule{\linewidth}{1.3pt}\par}
+\vspace{0.65cm}
 {\LARGE\bfseries \projecttitle\par}
-\vspace{0.7cm}
-{\color{uvblue}\rule{\linewidth}{1.2pt}\par}
+\vspace{0.65cm}
+{\color{uvblue}\rule{\linewidth}{1.3pt}\par}
 \vfill
 \begin{tabular}{rl}
 \textbf{Autora:} & \authorname \\
@@ -84,39 +132,46 @@
 \textbf{Fecha:} & Julio de 2026 \\
 \end{tabular}
 \vfill
-\begin{minipage}{0.9\textwidth}
+\begin{minipage}{0.92\textwidth}
 \centering
-\textbf{Repositorio:} \url{\repositoryurl}\\[0.3em]
-\textbf{Presentación grabada:} \presentationurl
+\textbf{Repositorio reproducible:} \url{\repositoryurl}
 \end{minipage}
 \end{titlepage}
 \hypersetup{pageanchor=true}
 
 \pagenumbering{roman}
 \input{sections/00_resumen}
-\newpage
+\clearpage
 \tableofcontents
-\newpage
+\clearpage
 \listoffigures
+\clearpage
 \listoftables
-\newpage
+\clearpage
+\input{sections/00_glosario}
 
 \clearpage
 \pagenumbering{arabic}
 \input{sections/01_introduccion}
 \input{sections/02_fundamentos}
-\input{sections/03_datos}
-\input{sections/04_metodologia}
-\input{sections/05_implementacion}
-\input{sections/06_experimentos}
-\input{sections/07_resultados_sinteticos}
-\input{sections/08_resultados_reales}
-\input{sections/09_discusion}
-\input{sections/10_conclusiones}
+\input{sections/03_datos_reales}
+\input{sections/04_datos_sinteticos}
+\input{sections/05_desarrollo_metodologico}
+\input{sections/06_implementacion}
+\input{sections/07_diseno_experimental}
+\input{sections/08_resultados_sinteticos}
+\input{sections/09_resultados_reales}
+\input{sections/10_discusion}
+\input{sections/11_conclusiones}
 
 \appendix
-\input{sections/A_reproducibilidad}
+\input{sections/A_ecuaciones_perdidas}
+\input{sections/B_tablas_completas}
+\input{sections/C_figuras_adicionales}
+\input{sections/D_reproducibilidad}
+\input{sections/E_trazabilidad_notebooks}
 
-\input{sections/B_referencias}
+\clearpage
+\input{sections/F_referencias}
 
 \end{document}

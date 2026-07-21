@@ -1,0 +1,62 @@
+\chapter{Implementación y trazabilidad}
+
+\section{Entorno de software}
+El proyecto se implementó en Python, con PyTorch para diferenciación automática y redes neuronales, SciPy para integración ODE, Nilearn y NiBabel para fMRI, NumPy/Pandas para manipulación de datos, scikit-learn para métricas y Matplotlib para visualización \citep{Paszke2019}. Los entrenamientos PINN se ejecutaron con precisión de 64 bits y GPU cuando estuvo disponible.
+
+\section{Pipeline de trece notebooks}
+El desarrollo se organizó como una progresión metodológica, no como un único notebook final:
+\begin{enumerate}
+  \item verificación de datos HCP y extracción de señales;
+  \item GLM basal real;
+  \item generación y validación del conjunto sintético;
+  \item GLM sintético;
+  \item MLP sintética;
+  \item piloto PINN global;
+  \item reformulación PINN inversa de ventana;
+  \item lote de 60 PINN sintéticas;
+  \item comparación estadística sintética;
+  \item preparación y control de calidad real;
+  \item piloto de modelos reales;
+  \item lote de ocho evaluaciones reales;
+  \item análisis final y exportación de tablas y figuras.
+\end{enumerate}
+
+La secuencia permite reconstruir por qué se modificó el método. Conservar el piloto fallido es relevante porque evita presentar la arquitectura final como una decisión arbitraria tomada después de ver resultados.
+
+\section{Código modular}
+Además de los notebooks, el repositorio contiene módulos reutilizables para:
+\begin{itemize}
+  \item ecuaciones Balloon--Windkessel y simulación;
+  \item conversión de eventos a estímulo;
+  \item cálculo BOLD desde estados;
+  \item métricas de regresión;
+  \item corrección de Holm y tamaño de efecto pareado;
+  \item control de semillas.
+\end{itemize}
+
+Se incluyeron pruebas fisiológicas básicas: equilibrio sin estímulo y respuesta positiva ante un evento. Las dos pruebas pasaron en Python 3.11. Estas verificaciones no sustituyen una batería completa de validación, pero detectan errores fundamentales de integración y estado basal.
+
+\section{Configuración y reproducibilidad}
+Los hiperparámetros se concentraron en archivos JSON y constantes documentadas. Los lotes guardaron resultados después de cada experimento y podían reanudarse desde un archivo de estado. Esta decisión fue necesaria porque 60 PINN sintéticas demandaron aproximadamente dos minutos cada una, alrededor de dos horas de cómputo total.
+
+\begin{lstlisting}[language=bash,caption={Comandos mínimos para instalar y verificar el repositorio.}]
+python -m venv .venv
+# activar el entorno
+pip install -r requirements.txt
+python -m pytest
+\end{lstlisting}
+
+\begin{lstlisting}[language=bash,caption={Orden conceptual de ejecución.}]
+# 1. preparar datos reales y sinteticos
+# 2. ejecutar GLM y MLP
+# 3. entrenar PINN piloto y PINN corregida
+# 4. ejecutar lotes sintetico y real
+# 5. consolidar resultados
+jupyter notebook notebooks/12_analisis_final_experimentos.ipynb
+\end{lstlisting}
+
+\section{Datos no distribuidos}
+Los volúmenes fMRI HCP crudos no se incluyen en GitHub por tamaño y condiciones de acceso. El repositorio documenta su estructura esperada y contiene resultados derivados livianos. Tampoco se versionan modelos binarios grandes ni historiales redundantes.
+
+\section{Control de versiones}
+El repositorio público conserva código, notebooks, configuraciones, figuras, tablas, informe y pruebas. Cada actualización del informe y la presentación se registra mediante commits. Esto aporta trazabilidad entre el código que generó resultados y las afirmaciones incluidas en la entrega.

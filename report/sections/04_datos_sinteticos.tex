@@ -1,0 +1,96 @@
+\chapter{Construcción del conjunto sintético}
+
+\section{Propósito de la verificación controlada}
+En datos reales no se conocen la HRF verdadera, los estados latentes ni los parámetros neurovasculares. Por ello, no es posible verificar si una solución aparentemente plausible recuperó la dinámica generadora. El conjunto sintético se construyó para responder una pregunta más precisa: ¿la implementación puede recuperar una solución conocida cuando el modelo utilizado para inferir coincide con el modelo generador?
+
+\cautionbox{Esta etapa es una \textbf{verificación controlada bajo modelo correctamente especificado}. No prueba por sí sola robustez frente a una fisiología distinta, constantes erróneas o mecanismos no representados en Balloon--Windkessel.}
+
+\section{Parámetros verdaderos}
+Se utilizaron los parámetros de \cref{tab:true_params}. Solo $\epsilon$, $\tau$ y $\alpha$ fueron tratados posteriormente como desconocidos; las demás constantes se fijaron tanto en generación como en inferencia.
+
+\begin{table}[H]
+\centering
+\caption{Parámetros verdaderos del conjunto sintético.}
+\label{tab:true_params}
+\begin{tabular}{lcl}
+\toprule
+\textbf{Parámetro} & \textbf{Valor} & \textbf{Función} \\
+\midrule
+$\epsilon$ & 0,15 & eficacia de entrada \\
+$\kappa_s$ & 0,65 & decaimiento de señal \\
+$\kappa_f$ & 0,41 & autorregulación de flujo \\
+$\tau$ & 0,98 & tiempo medio de tránsito \\
+$\alpha$ & 0,32 & relación flujo--volumen \\
+$E_0$ & 0,34 & extracción basal de oxígeno \\
+$V_0$ & 0,02 & volumen sanguíneo basal \\
+$k_1,k_2,k_3$ & 2,38; 2,00; 0,48 & coeficientes BOLD \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Escenarios temporales}
+Los cuatro escenarios sintéticos reprodujeron exactamente los inicios, duraciones y tiempos de muestreo de los cuatro escenarios reales. No se cambiaron los parámetros verdaderos entre escenarios; lo que cambió fue la posición temporal de los dos bloques objetivo dentro de la corrida. Esta elección permitió evaluar si el método era estable frente a ventanas ubicadas en diferentes zonas de la serie y distintas realizaciones de ruido.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{synthetic_clean_lr_m1_left.png}
+\caption{LR--M1 izquierda.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{synthetic_clean_lr_m1_right.png}
+\caption{LR--M1 derecha.}
+\end{subfigure}
+\vspace{0.4em}
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{synthetic_clean_rl_m1_left.png}
+\caption{RL--M1 izquierda.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{synthetic_clean_rl_m1_right.png}
+\caption{RL--M1 derecha.}
+\end{subfigure}
+\caption{Señales BOLD limpias generadas con el modelo Balloon--Windkessel. Los cuatro escenarios comparten parámetros y difieren en la localización temporal de los bloques.}
+\label{fig:synthetic_clean}
+\end{figure}
+
+\section{HRF operacional}
+Debido a la no linealidad del sistema, se evitó llamar a la respuesta una función impulso exacta. Se definió una HRF operacional como la respuesta a un evento rectangular estandarizado de un segundo, desde el estado basal. Con los parámetros verdaderos, alcanzó un pico de $0{,}5148\%$ BOLD a los \SI{3.55}{s} después del inicio y un posestímulo de $-0{,}0788\%$ a los \SI{9.6}{s}.
+
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.78\textwidth]{synthetic_ground_truth_hrf.png}
+\caption{HRF operacional verdadera, definida como la respuesta del sistema a un evento de un segundo.}
+\label{fig:true_hrf}
+\end{figure}
+
+\section{Modelo de ruido}
+Se generó ruido estructurado con tres componentes independientes antes del escalamiento:
+\begin{equation}
+\eta(t)=\sqrt{0{,}50}\,\eta_{\mathrm{blanca}}(t)+
+\sqrt{0{,}35}\,\eta_{\mathrm{AR(1)}}(t)+
+\sqrt{0{,}15}\,\eta_{\mathrm{deriva}}(t).
+\end{equation}
+
+La componente AR(1) utilizó $\rho=0{,}4$. La deriva combinó oscilaciones lentas de períodos \SI{80}{s} y \SI{140}{s}. Después de centrar y normalizar $\eta$, se escaló para obtener una SNR exacta:
+\begin{equation}
+\mathrm{SNR}=\frac{\operatorname{std}(y_{\mathrm{limpia}})}{\operatorname{std}(\eta_{\mathrm{escalada}})},
+\qquad
+\eta_{\mathrm{escalada}}=\eta\,\frac{\operatorname{std}(y_{\mathrm{limpia}})}{\mathrm{SNR}\,\operatorname{std}(\eta)}.
+\label{eq:snr}
+\end{equation}
+
+Se estudiaron SNR 10, 5 y 2, desde ruido moderado hasta severo. Para cada combinación escenario--SNR se generaron cinco réplicas con semillas reproducibles, totalizando
+\begin{equation}
+4\ \text{escenarios}\times3\ \text{SNR}\times5\ \text{réplicas}=60\ \text{señales}.
+\end{equation}
+
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.92\textwidth]{synthetic_noise_example.png}
+\caption{Ejemplo de señal limpia y señales ruidosas. La composición conserva correlación temporal y deriva, en lugar de usar únicamente ruido blanco.}
+\label{fig:synthetic_noise}
+\end{figure}
+
+\section{Partición fuera de muestra}
+El segundo bloque fue retenido para prueba. La ventana de evaluación se extendió desde \SI{2}{s} antes de su inicio hasta \SI{20}{s} después de su término. Con $TR=\SI{0.72}{s}$, la máscara contenía 47 puntos y el entrenamiento utilizó los 237 puntos restantes de la corrida. La misma partición se aplicó al GLM, la MLP y la PINN para que las métricas fueran pareadas.

@@ -1,37 +1,64 @@
-\section{Fundamentos teóricos}
+\chapter{Fundamentos teóricos y antecedentes}
 
-\subsection{Señal BOLD y función de respuesta hemodinámica}
+\section{La señal BOLD y la HRF}
+La activación neuronal modifica la demanda metabólica y desencadena mecanismos vasculares que alteran el flujo sanguíneo cerebral. El aumento de flujo suele superar el incremento de consumo de oxígeno, disminuyendo la concentración relativa de desoxihemoglobina y elevando la señal de resonancia ponderada en $T_2^*$. La forma temporal observada después de un evento se resume mediante la HRF.
 
-La señal BOLD depende de cambios en flujo sanguíneo, volumen vascular y concentración de desoxihemoglobina. La HRF resume la respuesta temporal observada después de una entrada neuronal breve. En un modelo lineal, la señal esperada puede expresarse como
+Una HRF típica presenta un retardo inicial, un pico positivo varios segundos después del estímulo y un posestímulo negativo. No obstante, estos rasgos no son invariantes. La variabilidad interregional e interindividual ha sido demostrada en estudios de repetibilidad y modelamiento flexible \citep{Handwerker2004,Neumann2003,Rangaprakash2018}. Por ello, la HRF debe entenderse como una respuesta efectiva de la cadena neurovascular y de la adquisición, no como una constante universal.
 
+\section{Modelo lineal general}
+En el enfoque clásico, la señal BOLD $y(t)$ se aproxima mediante
 \begin{equation}
-    y(t) = (u * h)(t) + \varepsilon(t),
+  \bm y = \bm X\bm\beta + \bm\varepsilon,
+  \label{eq:glm}
+\end{equation}
+donde $\bm X$ contiene regresores experimentales y de confusión, $\bm\beta$ son coeficientes desconocidos y $\bm\varepsilon$ representa error. Los regresores de tarea se construyen convolucionando los eventos $u_j(t)$ con una HRF canónica $h_c(t)$:
+\begin{equation}
+  x_j(t) = (u_j*h_c)(t).
 \end{equation}
 
-donde $u(t)$ representa el estímulo, $h(t)$ la HRF y $\varepsilon(t)$ el término de error. El GLM utiliza esta relación para construir regresores y estimar amplitudes de activación \citep{Friston1998}.
+El GLM permite separar condiciones, movimiento y deriva; sin embargo, una única HRF fija puede ser demasiado restrictiva. Existen extensiones mediante derivadas temporal y de dispersión, bases FIR o funciones spline \citep{Glover1999,Lindquist2009}. En este proyecto se eligió un GLM canónico como referencia simple y ampliamente reconocible, pero esta decisión se considera una limitación al interpretar las ventajas de la PINN.
 
-\subsection{Modelo Balloon--Windkessel}
-
-Se utilizaron cuatro estados normalizados: señal vasodilatadora $s(t)$, flujo de entrada $f(t)$, volumen sanguíneo venoso $v(t)$ y contenido de desoxihemoglobina $q(t)$. La dinámica implementada fue
-
+\section{Modelo Balloon--Windkessel}
+El modelo Balloon representa el compartimiento venoso como un globo distensible alimentado por flujo sanguíneo \citep{Buxton1998}. La versión dinámica utilizada combina una señal vasodilatadora $s$, flujo $f$, volumen $v$ y desoxihemoglobina $q$:
 \begin{align}
-\dot{s}(t) &= \epsilon u(t) - \kappa_s s(t) - \kappa_f\left[f(t)-1\right], \\
-\dot{f}(t) &= s(t), \\
-\tau\dot{v}(t) &= f(t) - v(t)^{1/\alpha}, \\
-\tau\dot{q}(t) &= \frac{f(t)}{E_0}\left[1-(1-E_0)^{1/f(t)}\right]
-                  - v(t)^{1/\alpha}\frac{q(t)}{v(t)}.
+\dot s &= \epsilon u(t)-\kappa_s s-\kappa_f(f-1), \\
+\dot f &= s, \\
+\tau\dot v &= f-v^{1/\alpha}, \\
+\tau\dot q &= \frac{f}{E_0}\left[1-(1-E_0)^{1/f}\right]-v^{1/\alpha}\frac{q}{v}.
+\label{eq:balloon}
 \end{align}
 
-La salida BOLD fraccional se calculó mediante
-
+El cambio BOLD fraccional se calcula como
 \begin{equation}
- y(t)=V_0\left[k_1(1-q(t))+k_2\left(1-\frac{q(t)}{v(t)}\right)+k_3(1-v(t))\right].
+ y(t)=V_0\left[k_1(1-q)+k_2\left(1-\frac{q}{v}\right)+k_3(1-v)\right],
+ \label{eq:bold}
+\end{equation}
+con $k_1=7E_0$, $k_2=2$ y $k_3=2E_0-0{,}2$ en la parametrización adoptada.
+
+Los estados basales son $s=0$ y $f=v=q=1$. Los parámetros inferidos tienen interpretaciones específicas, pero no completamente independientes:
+\begin{itemize}
+  \item $\epsilon$: acoplamiento efectivo entre estímulo y señal vasodilatadora;
+  \item $\tau$: tiempo medio de tránsito, con influencia en amplitud y recuperación;
+  \item $\alpha$: relación flujo--volumen, asociada a la distensibilidad efectiva.
+\end{itemize}
+
+El modelo simplifica una fisiología más compleja. La estimación de parámetros puede presentar correlaciones, múltiples combinaciones plausibles y sensibilidad a constantes fijadas. Por ello, la identificabilidad debe evaluarse explícitamente y los parámetros reales se denominan \emph{efectivos bajo el modelo}.
+
+\section{Problemas inversos e identificabilidad}
+Un problema directo calcula la señal a partir de parámetros conocidos. El problema inverso intenta recuperar parámetros o estados a partir de observaciones parciales. En sistemas dinámicos no lineales, una buena reconstrucción de la salida no garantiza que los parámetros sean únicos. La identificabilidad estructural pregunta si los parámetros serían recuperables con datos ideales; la identificabilidad práctica incorpora ruido, muestreo, duración y excitación experimental \citep{Miao2011,Chis2023}.
+
+En este proyecto, el único observable directo es BOLD; $s,f,v,q$ son estados latentes. Además, algunos parámetros se fijan para reducir el espacio inverso. Se estudia la estabilidad bidireccional como un diagnóstico práctico, no como una prueba formal de identificabilidad.
+
+\section{Redes neuronales informadas por la física}
+Una PINN representa una solución $\hat{\bm z}_\theta(t)$ mediante una red neuronal y calcula derivadas temporales por diferenciación automática. La pérdida combina términos de datos y residuos de ecuaciones:
+\begin{equation}
+\mathcal L = \lambda_d\mathcal L_d + \lambda_p\mathcal L_p + \lambda_i\mathcal L_i + \lambda_t\mathcal L_t.
+\label{eq:pinnloss}
 \end{equation}
 
-El modelo captura transitorios como sobreimpulso y undershoot postestímulo, además de la interacción entre flujo, volumen y oxigenación \citep{Buxton1998,Friston2000}.
+En problemas inversos, los parámetros físicos se optimizan junto con los pesos de la red. Esta estrategia se ha extendido a sistemas biológicos y fisiológicos \citep{Yazdani2020,Sel2023}. Su ventaja conceptual es utilizar conocimiento mecanístico como regularización. Sin embargo, las PINN pueden sufrir desequilibrio de gradientes, convergencia a soluciones triviales, rigidez, sensibilidad a escalamiento y residuos pequeños que no implican exactitud global \citep{Wang2021,Krishnapriyan2021,Basir2022,Wang2023}.
 
-\subsection{Redes neuronales informadas por la física}
+\section{Motivación de la formulación propuesta}
+La literatura de PINN suele evaluar la solución dentro del dominio donde se optimizan los residuos. Este proyecto introduce un criterio más exigente para la tarea específica: la PINN se utiliza para inferir parámetros desde un bloque y la predicción del bloque retenido se obtiene por un integrador ODE convencional. Si los parámetros no capturan una dinámica reproducible, la predicción falla aunque la red haya alcanzado una pérdida baja en entrenamiento.
 
-Una PINN aproxima los estados mediante una red neuronal diferenciable y penaliza el incumplimiento de las ecuaciones gobernantes. Dado un conjunto de tiempos de colocación $\{t_j\}$, la pérdida física se construye con residuos obtenidos por diferenciación automática. Esta estrategia permite abordar problemas directos e inversos sin discretizar explícitamente todas las variables latentes \citep{Raissi2019}.
-
-En este trabajo, $\epsilon$, $\tau$ y $\alpha$ se trataron como parámetros entrenables acotados. Los restantes parámetros fisiológicos se mantuvieron fijos para reducir la no identificabilidad.
+\methodbox{La estructura fisiológica no se presenta como garantía automática de verdad. Se utiliza como una hipótesis regularizadora verificable. La evaluación fuera de muestra y la comparación con una MLP son necesarias para distinguir ajuste de datos, generalización y recuperación de una HRF operacional.}

@@ -1,0 +1,34 @@
+\chapter{Reproducibilidad y estructura del repositorio}
+
+\section{Estructura}
+\begin{lstlisting}[language=bash]
+PINN-HRF-fMRI/
+|-- configs/          # hiperparametros y limites
+|-- data/             # documentacion y derivados livianos
+|-- docs/             # evolucion metodologica
+|-- notebooks/        # trece etapas reproducibles
+|-- report/           # LaTeX, figuras y PDF
+|-- results/          # metricas y figuras finales
+|-- scripts/          # auditoria y utilidades
+|-- src/pinn_hrf/     # modelo ODE, metricas y estadistica
+|-- tests/            # verificaciones fisiologicas basicas
+|-- requirements.txt
+|-- pyproject.toml
+`-- README.md
+\end{lstlisting}
+
+\section{Semillas y precisión}
+La generación sintética utilizó una semilla base documentada y derivaciones deterministas por escenario, SNR y réplica. Las MLP y PINN almacenaron la semilla de cada experimento. PyTorch operó en \texttt{float64} para reducir errores en derivadas y optimización de parámetros.
+
+\section{Resultados guardados}
+Los lotes exportaron métricas por corrida, parámetros, HRF, predicciones, estados de ejecución y resúmenes agregados. La etapa final generó tablas CSV, LaTeX y figuras para evitar transcribir manualmente valores al informe.
+
+\section{Pruebas}
+\begin{lstlisting}[language=bash]
+python -m pytest
+# Resultado verificado: 2 passed
+\end{lstlisting}
+Las pruebas actuales comprueban homeostasis sin estímulo y respuesta BOLD positiva. Trabajo futuro debe ampliar cobertura a dimensiones, acotación de parámetros, comparación con soluciones analíticas simples y estabilidad numérica.
+
+\section{Auditoría antes de publicar}
+Un script recorre el repositorio, clasifica archivos, detecta binarios y marca elementos mayores a 20 MB. La auditoría final no encontró datos crudos ni archivos de gran tamaño destinados a GitHub.

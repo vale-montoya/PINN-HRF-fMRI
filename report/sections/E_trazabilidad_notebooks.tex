@@ -1,0 +1,23 @@
+\chapter{Trazabilidad del desarrollo por notebook}
+
+\begin{longtable}{p{0.08\textwidth}p{0.28\textwidth}p{0.56\textwidth}}
+\toprule
+\textbf{N.º} & \textbf{Notebook} & \textbf{Aporte}\\
+\midrule
+01 & Verificación de datos & Comprueba archivos HCP, dimensiones, eventos y extrae las cuatro señales regionales.\\
+02 & GLM basal & Construye diseños LR/RL, verifica activación contralateral y define cautelas estadísticas.\\
+03 & Validación sintética & Implementa Balloon--Windkessel, HRF operacional, ruido estructurado y 60 señales.\\
+04 & GLM sintético & Evalúa el comparador canónico y su HRF.\\
+05 & MLP sintética & Implementa historia temporal, entrenamiento con detención temprana y prueba de HRF.\\
+06 & PINN piloto & Formula la red global, diagnostica la solución blanda y documenta la falla.\\
+06b & PINN inversa & Separa inferencia de parámetros y predicción ODE; valida el piloto corregido.\\
+07 & Lote PINN & Ejecuta 60 entrenamientos, guarda estados y permite reanudación.\\
+08 & Comparación sintética & Friedman, Wilcoxon--Holm, tamaños de efecto y reducciones relativas.\\
+09 & Preparación real & Ajusta confusores, define ventanas, calidad y repetibilidad.\\
+10 & Piloto real & Compara GLM, MLP y PINN; corrige el tratamiento de línea base.\\
+11 & Lote real & Ejecuta ocho direcciones y exporta métricas, parámetros y HRF.\\
+12 & Análisis final & Consolida tablas, figuras, estadística y consistencia sintética--real.\\
+\bottomrule
+\end{longtable}
+
+Esta trazabilidad evidencia que el resultado final no proviene de un único ajuste, sino de una secuencia de verificación, diagnóstico, reformulación y evaluación.

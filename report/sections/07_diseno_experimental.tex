@@ -1,0 +1,48 @@
+\chapter{Diseño experimental y métricas}
+
+\section{Experimentos sintéticos}
+Cada uno de los 60 conjuntos ruidosos se evaluó con GLM, MLP y PINN. Las comparaciones fueron pareadas porque los tres modelos observaron exactamente la misma señal y la misma ventana retenida. Las métricas de señal se calcularon solo en la ventana de prueba; las métricas de HRF utilizaron la respuesta operacional de un segundo.
+
+\section{Experimentos reales}
+En cada uno de los cuatro escenarios se realizaron dos direcciones:
+\begin{equation}
+B_1\rightarrow B_2,\qquad B_2\rightarrow B_1.
+\end{equation}
+Esto produjo ocho evaluaciones direccionales por modelo. La dirección inversa mide sensibilidad al bloque elegido para inferencia, pero no constituye una nueva unidad independiente: ambas direcciones comparten el mismo par de bloques. Además, todos los escenarios pertenecen al mismo sujeto.
+
+\cautionbox{Las pruebas estadísticas reales se reportan para describir el comportamiento pareado de los modelos, pero se interpretan como exploratorias. El tamaño muestral efectivo está más cerca de cuatro escenarios dependientes dentro de un sujeto que de ocho observaciones poblacionales.}
+
+\section{Métricas predictivas}
+Sea $y_i$ la señal observada y $\hat y_i$ la predicción:
+\begin{align}
+\mathrm{RMSE} &= \sqrt{\frac{1}{n}\sum_i(y_i-\hat y_i)^2},\\
+\mathrm{MAE} &= \frac{1}{n}\sum_i|y_i-\hat y_i|,\\
+R^2 &= 1-\frac{\sum_i(y_i-\hat y_i)^2}{\sum_i(y_i-\bar y)^2}.
+\end{align}
+También se calculó la correlación de Pearson. RMSE y MAE se expresaron en puntos porcentuales BOLD. Un $R^2$ negativo indica que el modelo predice peor que la media del bloque de prueba.
+
+\section{Métricas de HRF}
+En sintético se calcularon RMSE, $R^2$, Pearson, error de amplitud del pico y error de tiempo al pico. En real, al no existir ground truth, se compararon las HRF inferidas en ambas direcciones mediante RMSE, correlación y amplitud de pico.
+
+\section{Error de parámetros}
+En sintético, el error relativo fue
+\begin{equation}
+ e_\theta=100\frac{|\hat\theta-\theta^*|}{|\theta^*|}.
+\end{equation}
+En real se utilizó la diferencia simétrica entre estimaciones de ambos bloques:
+\begin{equation}
+ d_{\mathrm{sym}}(a,b)=100\frac{2|a-b|}{|a|+|b|}.
+\end{equation}
+Esta métrica evita elegir una dirección como referencia verdadera.
+
+\section{Brecha de generalización}
+Se definió
+\begin{equation}
+\Delta_{\mathrm{gen}}=\mathrm{RMSE}_{\mathrm{prueba}}-\mathrm{RMSE}_{\mathrm{entrenamiento}}.
+\end{equation}
+Una brecha grande sugiere que el modelo ajusta mejor el bloque observado de lo que generaliza al bloque retenido. No es una prueba formal de sobreajuste, pero es un diagnóstico directo bajo el diseño disponible.
+
+\section{Pruebas estadísticas}
+En sintético se utilizó Friedman para comparar tres modelos sobre observaciones pareadas. Cuando fue significativo, se aplicaron comparaciones de Wilcoxon pareadas y corrección de Holm \citep{Holm1979}. Se calculó correlación biserial por rangos como tamaño de efecto; valores cercanos a $\pm1$ indican predominio consistente de un método.
+
+Las barras de error de las figuras agregadas representan \textbf{desviación estándar} entre las 20 observaciones de cada SNR. Las reducciones porcentuales de RMSE se calcularon respecto de la media del comparador.

@@ -1,0 +1,101 @@
+\chapter{Resultados en fMRI real}
+
+\section{Piloto real y selección de preprocesamiento}
+El escenario RL--M1 izquierda se utilizó como piloto porque presentó alta repetibilidad. Después de reemplazar la extrapolación lineal por sustracción de mediana preestímulo, las ventanas conservaron sus pendientes y amplitudes. En la dirección $B_1\rightarrow B_2$, el GLM obtuvo RMSE $0{,}5537\%$, la MLP $0{,}5042\%$ y la PINN $0{,}5318\%$. En ese caso individual la MLP fue mejor en error, mientras el GLM alcanzó la mayor correlación. Esto evitó asumir de antemano que la ventaja sintética se repetiría en real.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{real_pilot_windows.png}
+\caption{Ventanas del piloto después de corrección basal.}
+\end{subfigure}\hfill
+\begin{subfigure}[t]{0.49\textwidth}
+\safegraphic[width=\linewidth]{real_pilot_prediction.png}
+\caption{Predicciones del bloque retenido.}
+\end{subfigure}
+\caption{Piloto real utilizado para fijar la estrategia final de ventanas y evaluación.}
+\label{fig:real_pilot}
+\end{figure}
+
+\section{Resultados agregados}
+\begin{table}[H]
+\centering
+\caption{Rendimiento real agregado en ocho evaluaciones direccionales. Media $\pm$ desviación estándar.}
+\label{tab:real_summary}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Modelo} & \textbf{RMSE [\%]} & \textbf{MAE [\%]} & \textbf{$R^2$} & \textbf{Pearson} & \textbf{Ganadores} \\
+\midrule
+PINN & $0,5019\pm0,0882$ & 0,4153 & 0,1525 & 0,7540 & 4/8 \\
+GLM  & $0,5538\pm0,0801$ & 0,4516 & 0,0346 & 0,4604 & 2/8 \\
+MLP  & $0,5646\pm0,1112$ & 0,4633 & -0,1418 & 0,7109 & 2/8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.82\textwidth]{real_model_summary_rmse.png}
+\caption{RMSE real medio y desviación estándar. La PINN presenta el menor promedio, pero existe superposición considerable.}
+\label{fig:real_summary_rmse}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.98\textwidth]{real_models_rmse_by_experiment.png}
+\caption{RMSE por escenario y dirección. Los nombres $B_1\rightarrow B_2$ y $B_2\rightarrow B_1$ muestran la sensibilidad al bloque usado para inferencia.}
+\label{fig:real_by_experiment}
+\end{figure}
+
+La PINN redujo el RMSE medio en 9,36\% respecto del GLM y 11,10\% respecto de la MLP. Sin embargo, la ventaja no fue uniforme. El resultado más favorable ocurrió en LR--M1 izquierda $B_2\rightarrow B_1$, mientras en otros casos ganó GLM o MLP.
+
+\section{Inferencia exploratoria}
+Friedman no detectó diferencias globales significativas en RMSE ($p=0{,}223$), MAE ($p=0{,}197$) o $R^2$ ($p=0{,}223$). Para correlación de Pearson se obtuvo $p=0{,}0076$. Las comparaciones Holm indicaron GLM--MLP $p=0{,}0234$, GLM--PINN $p=0{,}0313$ y MLP--PINN $p=0{,}0781$.
+
+No obstante, las ocho direcciones no son independientes. Por ello, la redacción correcta no es que MLP y PINN hayan demostrado superioridad poblacional, sino que en estos cuatro escenarios ambas mostraron mayor correspondencia temporal que el GLM y que este patrón merece validación en una cohorte independiente.
+
+\section{Brecha de generalización}
+El RMSE medio de entrenamiento fue 0,4910 para GLM, 0,2713 para MLP y 0,4027 para PINN. Las brechas prueba--entrenamiento fueron aproximadamente 0,063, 0,293 y 0,099 puntos porcentuales BOLD.
+
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.82\textwidth]{real_generalization_gap.png}
+\caption{Brecha de generalización real. Las barras de error representan desviación estándar entre las ocho direcciones.}
+\label{fig:real_gap}
+\end{figure}
+
+La MLP fue el modelo que más ajustó el bloque de entrenamiento y el que más perdió al cambiar de bloque. La PINN presentó una brecha intermedia y el menor RMSE medio de prueba. Este patrón es consistente con un posible efecto regularizador de la dinámica, pero no demuestra causalidad porque las arquitecturas y objetivos no fueron idénticos y no se realizó una ablación física pareada.
+
+\section{Consistencia de parámetros}
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.92\textwidth]{real_parameter_consistency.png}
+\caption{Diferencia simétrica de parámetros PINN entre los dos bloques de cada escenario.}
+\label{fig:real_param_consistency}
+\end{figure}
+
+La diferencia simétrica media fue 11,17\% para $\alpha$, 34,97\% para $\epsilon$ y 40,48\% para $\tau$. En LR--M1 derecha, $\epsilon$ quedó cerca de la cota inferior en ambas direcciones (0,0305 y 0,0369), sugiriendo poca información para identificar la eficacia de entrada. En RL--M1 izquierda y RL--M1 derecha, $\tau$ cambió 83,9\% y 64,9\%, respectivamente.
+
+Estos resultados muestran que una HRF con forma consistente no exige parámetros únicos. Diferentes combinaciones pueden compensarse en la salida BOLD, especialmente con una sola observación, un bloque corto y constantes fijadas.
+
+\section{Consistencia de HRF}
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.88\textwidth]{real_hrf_consistency.png}
+\caption{RMSE y correlación entre HRF estimadas desde bloques diferentes.}
+\label{fig:real_hrf_consistency}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\safegraphic[width=0.86\textwidth]{real_hrf_peak_comparison.png}
+\caption{Amplitud de pico de la HRF inferida en cada dirección.}
+\label{fig:real_hrf_peak}
+\end{figure}
+
+La correlación media entre HRF fue 0,958 y el RMSE medio 0,0428 puntos porcentuales BOLD. LR--M1 derecha obtuvo $r=0,99995$, aunque sus amplitudes fueron pequeñas. RL--M1 derecha mantuvo una forma similar ($r=0,937$), pero el pico aumentó de 0,218\% a 0,497\%, reflejando la diferencia de amplitud entre bloques reales.
+
+\section{Relación con repetibilidad}
+El análisis exploratorio de Spearman promedió ambas direcciones por escenario para evitar pseudorreplicación. Con solo cuatro escenarios, ninguna asociación entre calidad de bloques y RMSE fue concluyente. La figura correspondiente se conserva en el apéndice, pero no se utiliza como evidencia principal.
+
+\resultbox{\textbf{Resultado real principal.} La PINN obtuvo el menor RMSE promedio y HRF temporalmente consistentes en una prueba de concepto de un sujeto. Las diferencias de error no fueron concluyentes y $\epsilon$ y $\tau$ mostraron identificabilidad limitada.}

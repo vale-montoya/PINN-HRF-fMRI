@@ -1,0 +1,67 @@
+\chapter{Discusión}
+
+\section{Qué demuestra el trabajo}
+El proyecto demuestra que es posible formular la estimación de HRF como un problema inverso dinámico, implementar una PINN que infiera estados y parámetros, detectar una falla de generalización de una formulación inicial y corregirla mediante una predicción ODE independiente. La verificación sintética no se limita a un ejemplo visual: incluye 60 realizaciones, ruido estructurado, tres SNR, comparadores, recuperación de parámetros y pruebas pareadas.
+
+En real, el proyecto demuestra viabilidad técnica: extracción de ROI HCP, control de confusores, ventanas bidireccionales, comparación de modelos, consistencia de HRF y análisis de parámetros. El menor RMSE promedio de la PINN es promisorio, pero el tamaño y dependencia de la muestra impiden una conclusión definitiva.
+
+\section{Importancia de la reformulación}
+El hallazgo metodológico más importante fue que residuos físicos pequeños no garantizan generalización. Una red flexible puede distribuir error entre estados y satisfacer localmente las ODE, mientras produce trayectorias no reproducibles. Esta observación coincide con reportes de modos de falla y desequilibrio de entrenamiento en PINN \citep{Wang2021,Krishnapriyan2021,Basir2022,Wang2023}.
+
+La integración ODE independiente transforma la evaluación: los parámetros deben explicar una nueva entrada sin ayuda directa de los pesos de la red. De esta forma, la prueba se acerca más a la pregunta científica que a la optimización interna.
+
+\section{Interpretación de la ventaja sintética}
+La PINN dominó en señal y HRF porque su clase de modelo coincide con el generador. Esto es apropiado para verificar implementación, pero crea una ventaja estructural frente a un GLM canónico y una MLP sin conocimiento del sistema. La conclusión válida es que la PINN puede recuperar el modelo correcto bajo especificación correcta y ruido severo. No se demuestra todavía que sea robusta cuando la fisiología real se aparta de Balloon--Windkessel.
+
+Un experimento futuro debe variar $E_0$, $\kappa_s$ o $\kappa_f$ durante generación y mantenerlos fijos durante inferencia; usar otra familia de HRF; o introducir mecanismos de adaptación no modelados. Esto cuantificaría sesgo por desajuste.
+
+\section{Aporte de la física y ausencia de ablación directa}
+Los resultados son consistentes con un efecto regularizador: la MLP presenta mayor brecha real y deterioro sintético más fuerte al bajar SNR. Sin embargo, GLM, MLP y PINN difieren en arquitectura, representación de entrada y objetivo. Para atribuir causalidad a $\mathcal L_p$ se requiere una ablación con la misma red de estados, mismos datos e hiperparámetros, pero $\lambda_p=0$ o ecuaciones reemplazadas por restricciones parciales.
+
+Por ello, el informe evita la frase ``la PINN generaliza mejor gracias a la física'' y utiliza ``resultado consistente con un posible efecto regularizador de la estructura fisiológica''.
+
+\section{Limitaciones de los comparadores}
+El GLM canónico es una referencia clara, pero no representa todos los métodos estadísticos disponibles. Un GLM con derivadas temporal y de dispersión, una base FIR o un modelo spline podría adaptar la HRF. La MLP tampoco comparte exactamente la arquitectura de la PINN. Comparaciones futuras deberían incluir:
+\begin{itemize}
+  \item GLM canónico más derivadas;
+  \item FIR regularizado;
+  \item deconvolución flexible;
+  \item neural ODE sin pérdida física en la trayectoria;
+  \item ablación PINN emparejada;
+  \item inferencia bayesiana de parámetros.
+\end{itemize}
+
+\section{Dependencia de las evaluaciones reales}
+Invertir $B_1$ y $B_2$ es útil para evaluar estabilidad, pero no duplica el número de sujetos ni de pares de bloques. Las pruebas con $n=8$ pueden entregar una confianza mayor que la permitida por el diseño. En una cohorte mayor, la unidad de inferencia debería ser el sujeto o el escenario resumido por sujeto, usando modelos jerárquicos o pruebas sobre promedios independientes.
+
+\section{Identificabilidad y parámetros efectivos}
+$\alpha$ fue estable en sintético y relativamente estable en real. $\tau$ fue el parámetro más variable. Esta diferencia es coherente con que el observable BOLD combina $v$ y $q$, mientras varios parámetros alteran forma y recuperación de manera correlacionada. La duración de 12 segundos, el TR y el ruido pueden no excitar suficientemente todas las escalas temporales.
+
+Los parámetros reales no deben interpretarse como medidas clínicas individuales. Son valores efectivos condicionados a ROI, preprocesamiento, constantes fijas, inicialización, límites y modelo. La estabilidad de HRF fue mayor que la estabilidad de parámetros, demostrando que la salida puede estar mejor identificada que su descomposición mecanística.
+
+\section{Validez externa y alcance clínico}
+Un sujeto no permite inferencia poblacional. Además, se analizaron promedios regionales, no vóxeles individuales, y solo una tarea. El proyecto es una prueba de concepto de ingeniería biomédica, no un biomarcador clínico. Para avanzar hacia aplicaciones se requieren cohortes, sesiones repetidas, múltiples escáneres, robustez a movimiento, evaluación de incertidumbre y contraste con mediciones fisiológicas externas.
+
+\section{Fortalezas}
+\begin{itemize}
+  \item pregunta alineada con objetivos y evaluación;
+  \item separación explícita entre sintético y real;
+  \item criterio fuera de muestra estricto;
+  \item conservación y análisis de un piloto fallido;
+  \item 60 experimentos sintéticos pareados;
+  \item control real de confusores y repetibilidad;
+  \item interpretación prudente de estadística e identificabilidad;
+  \item repositorio público y trazable.
+\end{itemize}
+
+\section{Trabajo futuro priorizado}
+\begin{enumerate}
+  \item ablación emparejada de la pérdida física;
+  \item experimentos de desajuste del modelo;
+  \item expansión a una cohorte HCP con análisis por sujeto;
+  \item GLM flexible y FIR como comparadores;
+  \item múltiples inicializaciones y cuantificación de incertidumbre;
+  \item estimación conjunta o jerárquica de parámetros fijos;
+  \item validación externa en otro conjunto y otra tarea;
+  \item evaluación de intervalos de confianza de HRF y parámetros.
+\end{enumerate}
