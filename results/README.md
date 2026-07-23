@@ -1,6 +1,6 @@
 # Resultados
 
-En GitHub deben conservarse únicamente resultados livianos necesarios para verificar las conclusiones:
+Unicamente resultados livianos necesarios para verificar las conclusiones:
 
 - métricas agregadas;
 - métricas por experimento;
@@ -9,7 +9,7 @@ En GitHub deben conservarse únicamente resultados livianos necesarios para veri
 - figuras finales;
 - tablas usadas en el informe.
 
-No se deben versionar:
+No se versionan:
 
 - modelos binarios grandes;
 - historiales completos de miles de épocas si no son necesarios;
@@ -17,4 +17,4 @@ No se deben versionar:
 - datos crudos;
 - resultados temporales de depuración.
 
-La carpeta `results/final_analysis/` debe contener las tablas y figuras generadas por `12_analisis_final_experimentos.ipynb`.
+La carpeta `results/final_analysis/` contiene las tablas y figuras generadas por `12_analisis_final_experimentos.ipynb`.
