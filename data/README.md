@@ -34,7 +34,7 @@ Los archivos `.nii.gz` y los datos sujetos a condiciones de acceso se mantienen 
 
 ## Datos procesados livianos
 
-Pueden incluirse en `data/processed/` archivos pequeños y derivados, por ejemplo:
+
 
 - series temporales BOLD de las ROI;
 - metadatos de adquisición;
@@ -42,7 +42,6 @@ Pueden incluirse en `data/processed/` archivos pequeños y derivados, por ejempl
 - configuraciones de escenarios;
 - resúmenes de control de calidad.
 
-Antes de publicar un archivo derivado, verifica que su distribución sea compatible con las condiciones de uso del conjunto de datos original.
 
 ## Datos sintéticos
 
