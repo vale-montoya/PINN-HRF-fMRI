@@ -19,3 +19,5 @@ La bibliografía se procesa con BibTeX mediante `latexmk`.
 - `references.bib`: bibliografía.
 
 El informe distingue explícitamente entre verificación sintética bajo modelo correctamente especificado y aplicación real exploratoria.
+
+Link del video: https://drive.google.com/file/d/1M47oeaWy-gqEI8wY3vhF6Gqxt67hvKkD/view?usp=sharing
